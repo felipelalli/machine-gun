@@ -25,7 +25,8 @@ public interface QueueManager {
      *                  of data.
      * @param data The data to be put in the queue.
      */
-    void putInAEmbeddedQueue(ArmyAudit armyAudit, String queueName, byte[] data);
+    void putInAEmbeddedQueue(ArmyAudit armyAudit, String queueName, byte[] data)
+            throws InterruptedException;
 
     /**
      * Prepare a new consumer to work on new elements in the specified queue.
@@ -45,4 +46,6 @@ public interface QueueManager {
      */
     void registerAConsumerInEmbeddedQueue(ArmyAudit armyAudit,
                                           String queueName, Consumer consumer);
+    
+    void killAllConsumers(String queueName) throws InterruptedException;
 }

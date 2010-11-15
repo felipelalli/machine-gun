@@ -1,18 +1,12 @@
-package br.fml.eti.machinegun.auditorship;
+package br.fml.eti.machinegun.test;
 
 import br.fml.eti.behavior.BuildingException;
+import br.fml.eti.machinegun.auditorship.ArmyAudit;
 
-/**
- * A {@link NegligentAuditor} do nothing. Use it if you think the
- * monitor time is taking too much unnecessary time.
- *
- * @author Felipe Micaroni Lalli (micaroni@gmail.com)
- *         Nov 15, 2010 4:27:30 PM
- */
-public class NegligentAuditor implements ArmyAudit {
+public class SystemOutAudit implements ArmyAudit {
     @Override
     public void rearSoldierStartsHisJob(long jobId, String soldierName) {
-
+        System.out.println(jobId + ": " + soldierName + ": starts his job");
     }
 
     @Override
@@ -21,40 +15,43 @@ public class NegligentAuditor implements ArmyAudit {
                                           BuildingException exception,
                                           String message) {
 
+        System.out.println(jobId + ": " + soldierName + ": finishes his job: "
+                + success + ", exception: " + exception + ", message: " + message);
     }
 
     @Override
     public void updateBattalionSize(int newSize, int maxSize) {
-
+        System.out.println(newSize + " of " + maxSize + ": "
+                + (newSize * 100 / maxSize) + "%");
     }
 
     @Override
     public void frontLineSoldierIsReady(String soldierName) {
-
+        System.out.println(soldierName + " is ready!");
     }
 
     @Override
     public void rearSoldierIsReady(String soldierName) {
-
+        System.out.println(soldierName + " is ready!");
     }
 
     @Override
     public void frontLineSoldierStartsHisJob(long jobId, String soldierName) {
-
+        System.out.println(jobId + ": " + soldierName + ": starts his job");
     }
 
     @Override
     public void frontLineSoldierFinishesHisJob(long jobId, String soldierName) {
-
+        System.out.println(jobId + ": " + soldierName + ": finishes his job!");
     }
 
     @Override
     public void frontLineSoldierDied(String soldierName) {
-
+        System.out.println(soldierName + " died!");
     }
 
     @Override
     public void rearSoldierDied(String soldierName) {
-       
+        System.out.println(soldierName + " died!");
     }
 }

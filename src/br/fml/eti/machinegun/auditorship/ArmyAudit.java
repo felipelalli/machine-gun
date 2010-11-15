@@ -88,4 +88,10 @@ public interface ArmyAudit {
      * @param soldierName The thread's name.
      */
     void frontLineSoldierDied(String soldierName);
+
+    /**
+     * It happens when a mission finished.
+     * @param soldierName The thread's name.
+     */
+    void rearSoldierDied(String soldierName);    
 }

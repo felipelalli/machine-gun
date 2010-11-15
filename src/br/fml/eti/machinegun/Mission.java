@@ -154,7 +154,7 @@ public class Mission<BulletType> {
 
         try {
             armyAudit.rearSoldierStartsHisJob(id, soldier);
-            target.workOnIt(armyAudit, data);
+            target.workOnIt(id, armyAudit, data);
             // workOnIt MUST call ArmyAudit#rearSoldierFinishesHisJob
         } catch (BuildingException e) {
             armyAudit.rearSoldierFinishesHisJob(
@@ -165,7 +165,9 @@ public class Mission<BulletType> {
         }
     }
 
-    private void frontLineSoldierWork(String soldierName, byte[] data) {
+    private void frontLineSoldierWork(String soldierName, byte[] data)
+            throws InterruptedException {
+        
         long id = random.nextLong();
         armyAudit.updateBattalionSize(battalion.size(), battalionSize);
         armyAudit.frontLineSoldierStartsHisJob(id, soldierName);
@@ -189,9 +191,13 @@ public class Mission<BulletType> {
                 t.join();
             }
         }
+
+        importedWeapons.getQueueManager().killAllConsumers(target.getQueueName());
     }
 
-    private void putInAEmbeddedQueue(String queueName, byte[] data) {
+    private void putInAEmbeddedQueue(String queueName, byte[] data)
+            throws InterruptedException {
+        
         importedWeapons.getQueueManager()
                 .putInAEmbeddedQueue(armyAudit, queueName, data);
     }

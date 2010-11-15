@@ -10,10 +10,12 @@ import br.fml.eti.machinegun.auditorship.ArmyAudit;
  */
 public interface DirtyTask<T> {
     /**
-     * It can take a loooong time!
+     * It can take a loooong long time!
      *
+     * @param jobId The job identity to be called by <code>audit</code>.
+     * @param dataToBeProcessed data ("bullet")
      * @param audit Details of processing. <b>The specific implementation
      *              MUST call the method {@link ArmyAudit#rearSoldierFinishesHisJob}</b>.
      */
-    public void workOnIt(ArmyAudit audit, T dataToBeProcessed);
+    public void workOnIt(long jobId, ArmyAudit audit, T dataToBeProcessed);
 }
