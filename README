@@ -1,0 +1,23 @@
+The main idea of the /machine-gun/ project is to avoid stopping
+the main flow when expensive things is needed, like I/O operations.
+
+First, /machine-gun/ will put everything in an (limited) internal buffer,
+after some consumers will put it in an internal persisted queue to
+finally, others consumers do the expensive operation.
+
+Everything can be externally monitored, specially the operations times
+mensured in nano seconds.
+
+  .
+  ,,                        __,--.            
+ ''      ,                 /_,__,_)        ,----. 
+ '      /|________________//__   __________|'##'|_____
+  =====(  )_##################)==`)###################|
+       ,' |_)#################)===)#######__`__`__`___|____
+      =`--"._,_,_#############)===)######(_,_,_,_,_,_,_,_,_)
+                 '--,_,__,__|.------.,--.,-.[JW],-----'
+                             |-##-| ||  )) |###( 
+                             |-##-| '======|,###\
+                             '----'        \,####\
+                                            \,####)
+                                             \_,-"
