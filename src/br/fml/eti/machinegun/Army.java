@@ -1,6 +1,9 @@
 package br.fml.eti.machinegun;
 
 import br.fml.eti.behavior.Factory;
+import br.fml.eti.machinegun.auditorship.ArmyAudit;
+import br.fml.eti.machinegun.auditorship.LazyArmyAudit;
+import br.fml.eti.machinegun.externaltools.ImportedWeapons;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +18,9 @@ import java.util.Map;
  *         Nov 15, 2010 6:15:37 AM
  */
 public class Army extends Factory<MachineGun> {
-    private Map<String, Captain> missions;    
+    private Map<String, Mission> missions;
+    private ArmyAudit armyAudit;
+    private ImportedWeapons importedWeapons;
 
     /**
      * The default is {@value}.
@@ -23,19 +28,36 @@ public class Army extends Factory<MachineGun> {
     public static final int DEFAULT_BUFFER_SIZE = 256;
 
     /**
-     * It will use {@link Runtime#availableProcessors()}.
+     * It will use {@link Runtime#availableProcessors()}<code> - 1</code>
+     * for <code>frontLineNumberOfSoldiers</code> and
+     * {@link Runtime#availableProcessors()}<code> * 3</code>
+     * for <code>rearNumberOfSoldiers</code>. 
      */
-    public static final int DYNAMIC_NUMBER_OF_CONSUMERS = 0;
+    public static final int SMART_NUMBER_OF_CONSUMERS = 0;
 
     /**
      * Create a new Army. See {@link #startNewMission} to have some fun.
+     * 
+     * @param armyAudit If you want to take control of your Army. See
+     *                  {@link LazyArmyAudit} if you don't need of
+     *                  auditorship. This parameter don't accept <code>null</code>.
+     *
+     * @param importedWeapons Specific implementations.
      */
-    public Army() {
-        this.missions = new HashMap<String, Captain>();
+    public Army(ArmyAudit armyAudit, ImportedWeapons importedWeapons) {
+        this.missions = new HashMap<String, Mission>();
+
+        if (armyAudit == null || importedWeapons == null) {
+            throw new NullPointerException("Internal error: armyAudit and"
+                    + " importedWeapons can't be null!");
+        }
+
+        this.armyAudit = armyAudit;
+        this.importedWeapons = importedWeapons;
     }
 
     /**
-     * Associates a {@link Captain} with a {@link DirtyTask dirty task}
+     * Associates a {@link Mission} with a {@link DirtyTask dirty task}
      * {@link Factory factory}. You have to use different queues to each
      * dirty task factory; in other words: each queue will transport only
      * the same kind of data. This function will create
@@ -70,14 +92,14 @@ public class Army extends Factory<MachineGun> {
      *
      * @param frontLineNumberOfSoldiers The number of thread consumers to read from
      *                                   internal buffer and put on internal
-     *                                   queue. Use {@link #DYNAMIC_NUMBER_OF_CONSUMERS}
+     *                                   queue. Use {@link #SMART_NUMBER_OF_CONSUMERS}
      *                                   to make the MachineGun calculates based
      *                                   on your {@link Runtime#availableProcessors()
      *                                   available processors}.
      *
      * @param rearNumberOfSoldiers The number of embedded queue thread consumers.
      *                              This consumers will do the dirty and hard workOnIt.
-     *                              Use {@link #DYNAMIC_NUMBER_OF_CONSUMERS}
+     *                              Use {@link #SMART_NUMBER_OF_CONSUMERS}
      *                              to make the MachineGun calculates based
      *                              on your {@link Runtime#availableProcessors()
      *                              available processors}.
@@ -90,12 +112,25 @@ public class Army extends Factory<MachineGun> {
                                int rearNumberOfSoldiers) {
 
         Target<T> target = new Target<T>(queueName, dirtyTaskFactory);
-        Captain<T> responsibleCaptain = new Captain<T>(target, capsule,
-                battalionSize, frontLineNumberOfSoldiers, rearNumberOfSoldiers);
+        Mission<T> mission = new Mission<T>(armyAudit, importedWeapons,
+                target, capsule, battalionSize,
+                frontLineNumberOfSoldiers, rearNumberOfSoldiers);
 
-        this.missions.put(missionName, responsibleCaptain);
+        this.missions.put(missionName, mission);
 
-        responsibleCaptain.startTheMission();
+        mission.startTheMission();
+    }
+
+    public void finalize() throws Throwable {
+        for (String mission : this.missions.keySet()) {
+            this.stopTheMission(mission);
+        }
+
+        super.finalize();
+    }
+
+    public void stopTheMission(String missionName) throws InterruptedException {
+        this.missions.get(missionName).stopTheMission();
     }
 
     @Override
@@ -107,7 +142,7 @@ public class Army extends Factory<MachineGun> {
     }
 
     /**
-     * Produces a shiny new gun.
+     * Produces a shiny new machine gun.
      * 
      * @return a new machine gun to be used immediately.
      */
@@ -115,9 +150,18 @@ public class Army extends Factory<MachineGun> {
         return new MachineGun<T>() {
             @Override
             public void fire(T bullet, String missionName)
-                    throws UnregisteredMissionException {
+                    throws UnregisteredMissionException, InterruptedException {
 
-                
+                Mission mission = missions.get(missionName);
+
+                if (mission == null) {
+                    throw new UnregisteredMissionException("The mission '"
+                            + missionName
+                            + "' was not registered yet! See 'startNewMission(...)'"
+                            + " function.");
+                } else {
+                    mission.fire(bullet);
+                }
             }
         };
     }

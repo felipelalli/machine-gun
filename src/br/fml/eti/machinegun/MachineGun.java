@@ -25,6 +25,11 @@ public abstract class MachineGun<T> {
      * in an internal queue to be processed as soon as possible until finally
      * reach the target.
      *
+     * @throws UnregisteredMissionException If you forget to start a mission
+     *                                      before using {@link Army#startNewMission}.
+     * @throws InterruptedException If the army is busy (internal buffer is full)
+     *                              so this function can block indefinitely.
+     *
      * @param bullet The <b>data</b> to be processed.
      *
      * @param missionName Where and how the "bullet" (data) will reach the target.
@@ -32,5 +37,5 @@ public abstract class MachineGun<T> {
      *               see the {@link Army#startNewMission} to know how to do this.
      */
     public abstract void fire(T bullet, String missionName)
-            throws UnregisteredMissionException;
+            throws UnregisteredMissionException, InterruptedException;
 }
