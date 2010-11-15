@@ -4,6 +4,7 @@
 # Project files
 .idea/
 *.iml
+*.eml
 
 # Compile generated files
 out/
