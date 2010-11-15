@@ -1,22 +1,21 @@
 package br.fml.eti.machinegun;
 
-import br.fml.eti.behavior.BuildingException;
 import br.fml.eti.behavior.Factory;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Produces {@link MachineGun machine guns}.
+ * Produces {@link MachineGun machine guns}. Also, organize the soldiers
+ * ({@link Thread threads}) to let the bullet (data) reach the right destination. 
+ * Bullets are data, and bullets are from a specific type.
+ * A machine gun is a way to make this process very fast, asynchronously.
  *
  * @author Felipe Micaroni Lalli (micaroni@gmail.com)
  *         Nov 15, 2010 6:15:37 AM
  */
 public class Army extends Factory<MachineGun> {
-    private int internalBufferSize;
-    private int frontLineNumberOfConsumers;
-    private int rearNumberOfConsumers;
-    private Map<String, Factory<HeavyTask>> targets;
+    private Map<String, Captain> missions;    
 
     /**
      * The default is {@value}.
@@ -29,73 +28,97 @@ public class Army extends Factory<MachineGun> {
     public static final int DYNAMIC_NUMBER_OF_CONSUMERS = 0;
 
     /**
-     * Create a new Army.
-     * 
-     * @param internalBufferSize If the buffer is full the TODO
-     *                           function will be blocked until the consumers
-     *                           can drain the volume. You can use
-     *                           {@link #DEFAULT_BUFFER_SIZE}. Set
-     *                           high values if you have high available memory
-     *                           and don't care so much about lost some data.
-     *                           Remember that what is on the buffer will not be
-     *                           persisted. If is important to persist ALL,
-     *                           set this parameter to 1.
+     * Create a new Army. See {@link #startNewMission} to have some fun.
+     */
+    public Army() {
+        this.missions = new HashMap<String, Captain>();
+    }
+
+    /**
+     * Associates a {@link Captain} with a {@link DirtyTask dirty task}
+     * {@link Factory factory}. You have to use different queues to each
+     * dirty task factory; in other words: each queue will transport only
+     * the same kind of data. This function will create
      *
-     * @param frontLineNumberOfConsumers The number of consumers to read from
+     * @param missionName The mission name. Can be the same of queueName.
+     * @param queueName The queue name where the "bullets" (data) from
+     *                  the {@link MachineGun machine guns} will be transported
+     *                  to the final {@link Target target}. If you are using
+     *                  a JMS based queue, it is the
+     *                  <code>javax.jms.Queue#getQueueName()</code>.
+     *
+     * @param dirtyTaskFactory the associated factory of dirties tasks. When the
+     *                         "bullet" (data) reaches the target, the
+     *                         {@link DirtyTask dirty task} will be executed
+     *                         on the data.
+     *
+     * @param capsule A {@link Capsule} is a way to keep the
+     *                "bullet" (data) intact through the way to
+     *                the target. It can convert data to a byte array and
+     *                vice-versa.
+     *
+     * @param battalionSize It is the <b>internal buffer size</b>.
+     *                      If the buffer is full, the {@link MachineGun#fire}
+     *                      function will be blocked until the consumers
+     *                      can drain the volume. You can use
+     *                      {@link #DEFAULT_BUFFER_SIZE}. Set
+     *                      high values if you have high available memory
+     *                      and don't care so much about lost some data.
+     *                      <i>Remember that what is on the buffer will not be
+     *                      persisted. If is important to persist EVERYTHING,
+     *                      set this parameter to <b>1</b></i>.
+     *
+     * @param frontLineNumberOfSoldiers The number of thread consumers to read from
      *                                   internal buffer and put on internal
      *                                   queue. Use {@link #DYNAMIC_NUMBER_OF_CONSUMERS}
      *                                   to make the MachineGun calculates based
      *                                   on your {@link Runtime#availableProcessors()
      *                                   available processors}.
      *
-     * @param rearNumberOfConsumers The number of embedded queue consumers.
-     *                              This consumers will do the dirty and hard work.
+     * @param rearNumberOfSoldiers The number of embedded queue thread consumers.
+     *                              This consumers will do the dirty and hard workOnIt.
      *                              Use {@link #DYNAMIC_NUMBER_OF_CONSUMERS}
      *                              to make the MachineGun calculates based
      *                              on your {@link Runtime#availableProcessors()
      *                              available processors}.
      */
-    public Army(int internalBufferSize, int frontLineNumberOfConsumers,
-                int rearNumberOfConsumers) {
+    public <T> void startNewMission(String missionName, String queueName,
+                               Factory<DirtyTask<T>> dirtyTaskFactory,
+                               Capsule<T> capsule,
+                               int battalionSize,
+                               int frontLineNumberOfSoldiers,
+                               int rearNumberOfSoldiers) {
 
-        this.targets = new HashMap<String, Factory<HeavyTask>>();
+        Target<T> target = new Target<T>(queueName, dirtyTaskFactory);
+        Captain<T> responsibleCaptain = new Captain<T>(target, capsule,
+                battalionSize, frontLineNumberOfSoldiers, rearNumberOfSoldiers);
 
-        if (internalBufferSize < 1) {
-            new IllegalArgumentException("internalBufferSize must be one or more.");
-        }
+        this.missions.put(missionName, responsibleCaptain);
 
-        if (frontLineNumberOfConsumers < 1) {
-            frontLineNumberOfConsumers = Runtime.getRuntime().availableProcessors();
-        }
-
-        if (rearNumberOfConsumers < 1) {
-            rearNumberOfConsumers = Runtime.getRuntime().availableProcessors();
-        }
-
-        this.internalBufferSize = internalBufferSize;
-        this.frontLineNumberOfConsumers = frontLineNumberOfConsumers;
-        this.rearNumberOfConsumers = rearNumberOfConsumers;
-
-
-    }
-
-    /**
-     * Associate a target (by the queue name) with a {@link HeavyTask heavy task}
-     * {@link Factory factory}.
-     *
-     * @param targetAndQueueName The target and embedded queue name.
-     * @param heavyTaskFactory the associated factory of heavy tasks.
-     */
-    public void registerTarget(String targetAndQueueName, Factory<HeavyTask> heavyTaskFactory) {
-        this.targets.put(targetAndQueueName, heavyTaskFactory);
-    }
-
-    public HeavyTask getHeavyTaskByTargetName(String targetName) throws BuildingException {
-        return this.targets.get(targetName).buildANewInstance();
+        responsibleCaptain.startTheMission();
     }
 
     @Override
+    /**
+     * @see #getANewMachineGun()
+     */
     public MachineGun buildANewInstance() {
-        
+        return this.getANewMachineGun();
+    }
+
+    /**
+     * Produces a shiny new gun.
+     * 
+     * @return a new machine gun to be used immediately.
+     */
+    public <T> MachineGun<T> getANewMachineGun() {
+        return new MachineGun<T>() {
+            @Override
+            public void fire(T bullet, String missionName)
+                    throws UnregisteredMissionException {
+
+                
+            }
+        };
     }
 }

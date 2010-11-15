@@ -2,10 +2,12 @@ package br.fml.eti.machinegun;
 
 /**
  * <p>
- * MachineGun avoid stopping the main flow when expensive things is needed,
- * like I/O operations. First, MachineGun will put everything in an (limited)
+ * A "machine gun" avoid stopping the main flow when expensive things is needed,
+ * like I/O operations. First, {@link MachineGun} will put everything in an (limited)
  * internal buffer, after some consumers will put it in an internal persisted
- * queue to finally, others consumers do the expensive operation.
+ * queue to finally, others consumers do the expensive operation. A "machine gun"
+ * is very useful, e.g., when you need a fast (and asynchronous) persistence into
+ * a (slow) database. 
  * </p>
  * <p>
  * Everything can be externally monitored, specially the operations times
@@ -24,12 +26,11 @@ public abstract class MachineGun<T> {
      * reach the target.
      *
      * @param bullet The <b>data</b> to be processed.
-     * @param capsule A {@link Capsule} is a way to keep the
-     *                "bullet" (data) intact through the way to
-     *                the target.
-     * @param targetName Where and how the "bullet" (data) will reach the target.
-     *               You <u>have to</u> register a target in the {@link Army}:
-     *               see the {@link Army#registerTarget} to know how to do this.
+     *
+     * @param missionName Where and how the "bullet" (data) will reach the target.
+     *               You <u>have to</u> register a mission in the {@link Army}:
+     *               see the {@link Army#startNewMission} to know how to do this.
      */
-    public abstract void fire(T bullet, Capsule<T> capsule, String targetName) throws UnregisteredTargetException;
+    public abstract void fire(T bullet, String missionName)
+            throws UnregisteredMissionException;
 }
