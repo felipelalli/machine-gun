@@ -21,3 +21,10 @@ mensured in nano seconds.
                              '----'        \,####\
                                             \,####)
                                              \_,-"
+                                                                               
+== Requisites ==
+* Java 1.6 or better
+* ant 1.8 or better
+
+== To build ==
+Just type "ant" in project root and follow the instructions.
