@@ -4,6 +4,7 @@ import br.fml.eti.machinegun.auditorship.ArmyAudit;
 import br.fml.eti.machinegun.externaltools.Consumer;
 import br.fml.eti.machinegun.externaltools.QueueManager;
 
+import javax.naming.directory.Attributes;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,20 +22,25 @@ public class FakeQueueManager implements QueueManager {
 
     private Random random = new Random();
     private ArrayList<Thread> threads = new ArrayList<Thread>();
+    private boolean end = false;
 
     @Override
     public void putInAEmbeddedQueue(ArmyAudit armyAudit,
                                     String queueName, byte[] data)
             throws InterruptedException {
 
+        long timeToWait = random.nextInt(500);
+        Thread.sleep(timeToWait);
+
+        getQueue(queueName).put(data);
+    }
+
+    private BlockingQueue<byte[]> getQueue(String queueName) {
         if (!queues.containsKey(queueName)) {
             queues.put(queueName, new LinkedBlockingQueue<byte[]>());
         }
 
-        long timeToWait = random.nextInt(500);
-        Thread.sleep(timeToWait);
-
-        queues.get(queueName).put(data);
+        return queues.get(queueName);
     }
 
     int size = 0;
@@ -48,14 +54,16 @@ public class FakeQueueManager implements QueueManager {
 
         Thread t = new Thread("mock consumer " + size + " of " + size) {
             public void run() {
-                while (!Thread.currentThread().isInterrupted()) {
+                while (!end) {
                     try {
-                        byte[] data = queues.get(queueName).take();
+                        byte[] data = getQueue(queueName).take();
                         consumer.consume(data);
                     } catch (InterruptedException e) {
-                        armyAudit.rearSoldierDied(Thread.currentThread().getName());
+
                     }
                 }
+
+                armyAudit.rearSoldierDied(Thread.currentThread().getName());
             }
         };
 
@@ -66,6 +74,7 @@ public class FakeQueueManager implements QueueManager {
     @Override
     public void killAllConsumers(String queueName) throws InterruptedException {
         for (Thread t : threads) {
+            end = true;
             t.interrupt();
         }
 

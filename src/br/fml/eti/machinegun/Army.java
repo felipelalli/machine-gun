@@ -132,8 +132,14 @@ public class Army extends Factory<MachineGun> {
         super.finalize();
     }
 
-    public void stopTheMission(String missionName) throws InterruptedException {
-        this.missions.get(missionName).stopTheMission();
+    public void stopTheMission(String missionName) throws
+            InterruptedException, UnregisteredMissionException {
+
+        if (!this.missions.containsKey(missionName)) {
+            throw new UnregisteredMissionException(missionName);
+        } else {
+            this.missions.get(missionName).stopTheMission();
+        }
     }
 
     @Override

@@ -8,6 +8,7 @@ import br.fml.eti.machinegun.externaltools.ImportedWeapons;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -47,6 +48,7 @@ public class Mission<BulletType> {
 
     // aux
     private Random random = new Random();
+    private boolean end = false;
 
     public Mission(ArmyAudit armyAudit, ImportedWeapons importedWeapons,
                    Target<BulletType> target, Capsule<BulletType> capsule,
@@ -119,15 +121,19 @@ public class Mission<BulletType> {
                         boolean interrupted = false;
                         armyAudit.frontLineSoldierIsReady(soldierName);
 
-                        while (!interrupted) {
+                        while (!end || battalion.size() > 0) {
                             try {
-                                byte[] data = battalion.take();
-                                frontLineSoldierWork(soldierName, data);
+                                byte[] data = battalion.poll(5, TimeUnit.SECONDS);
+
+                                if (data != null) {
+                                    frontLineSoldierWork(soldierName, data);
+                                }
                             } catch (InterruptedException e) {
-                                interrupted = true;
-                                armyAudit.frontLineSoldierDied(soldierName);
+                                end = true;
                             }
                         }
+
+                        armyAudit.frontLineSoldierDied(soldierName);
                     }
                 };
 
@@ -188,19 +194,17 @@ public class Mission<BulletType> {
      * @throws InterruptedException Because it waits the threads die.
      */
     public void stopTheMission() throws InterruptedException {
-        for (Thread t : frontLineSoldiers) {
-            if (t != null) {
-                t.interrupt();
-            }
-        }
+        if (!end) {
+            end = true;
 
-        for (Thread t : frontLineSoldiers) {
-            if (t != null) {
-                t.join();
+            for (Thread t : frontLineSoldiers) {
+                if (t != null) {
+                    t.join();
+                }
             }
-        }
 
-        importedWeapons.getQueueManager().killAllConsumers(target.getQueueName());
+            importedWeapons.getQueueManager().killAllConsumers(target.getQueueName());
+        }
     }
 
     private void putInAEmbeddedQueue(String queueName, byte[] data)

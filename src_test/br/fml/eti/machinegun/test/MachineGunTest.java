@@ -10,8 +10,6 @@ import java.util.Random;
 
 public class MachineGunTest {
     @Test public void test() throws Exception {
-        Random random = new Random();
-
         Army army = new Army(new SystemOutAudit(),
                 new ImportedWeapons(new FakeQueueManager()));
 
@@ -22,6 +20,10 @@ public class MachineGunTest {
 
         MachineGun<Integer> machineGune = army.getANewMachineGun();
 
-        machineGune.fire(random.nextInt(), "default mi");
+        for (int i = 0; i < 10000000; i++) {
+            machineGune.fire(i, "default mission");
+        }
+
+        army.stopTheMission("default mission");
     }
 }
