@@ -61,7 +61,7 @@ public class Mission<BulletType> {
 
         if (frontLineNumberOfSoldiers < 1) {
             frontLineNumberOfSoldiers
-                    = Runtime.getRuntime().availableProcessors();
+                    = Runtime.getRuntime().availableProcessors() * 2;
 
             if (frontLineNumberOfSoldiers < 1) {
                 frontLineNumberOfSoldiers = 1;
@@ -70,7 +70,7 @@ public class Mission<BulletType> {
 
         if (rearNumberOfSoldiers < 1) {
             rearNumberOfSoldiers
-                    = Runtime.getRuntime().availableProcessors() * 3;
+                    = Runtime.getRuntime().availableProcessors() * 5;
 
             if (rearNumberOfSoldiers < 1) {
                 rearNumberOfSoldiers = 1;

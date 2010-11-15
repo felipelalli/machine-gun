@@ -30,9 +30,9 @@ public class Army extends Factory<MachineGun> {
     public static final int DEFAULT_BATTALION_SIZE = 1024;
 
     /**
-     * It will use {@link Runtime#availableProcessors()}
+     * It will use {@link Runtime#availableProcessors()}<code> * 2</code>
      * for <code>frontLineNumberOfSoldiers</code> and
-     * {@link Runtime#availableProcessors()}<code> * 3</code>
+     * {@link Runtime#availableProcessors()}<code> * 5</code>
      * for <code>rearNumberOfSoldiers</code>. The soldiers are the
      * threads to consume the volume of data.
      */

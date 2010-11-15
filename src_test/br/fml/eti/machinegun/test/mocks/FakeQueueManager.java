@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Felipe Micaroni Lalli (micaroni@gmail.com)
@@ -29,8 +30,10 @@ public class FakeQueueManager implements QueueManager {
                                     String queueName, byte[] data)
             throws InterruptedException {
 
-        long timeToWait = random.nextInt(500);
-        Thread.sleep(timeToWait);
+        long timeToWait = random.nextInt(100000);
+        while (timeToWait > 0) { // HARD USE PROCESSOR
+            timeToWait--;
+        }
 
         getQueue(queueName).put(data);
     }
@@ -54,10 +57,13 @@ public class FakeQueueManager implements QueueManager {
 
         Thread t = new Thread("mock consumer " + size + " of " + size) {
             public void run() {
-                while (!end) {
+                while (!end || getQueue(queueName).size() > 0) {
                     try {
-                        byte[] data = getQueue(queueName).take();
-                        consumer.consume(data);
+                        byte[] data = getQueue(queueName).poll(5, TimeUnit.SECONDS);
+
+                        if (data != null) {
+                            consumer.consume(data);
+                        }
                     } catch (InterruptedException e) {
 
                     }
@@ -75,7 +81,6 @@ public class FakeQueueManager implements QueueManager {
     public void killAllConsumers(String queueName) throws InterruptedException {
         for (Thread t : threads) {
             end = true;
-            t.interrupt();
         }
 
         for (Thread t : threads) {

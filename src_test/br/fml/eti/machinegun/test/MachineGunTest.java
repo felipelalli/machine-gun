@@ -15,12 +15,12 @@ public class MachineGunTest {
 
         army.startNewMission("default mission",
                 "default queue", new ProcessIntegerSlowly(),
-                new CapsuleInteger(), Army.DEFAULT_BATTALION_SIZE,
+                new CapsuleInteger(), Army.DEFAULT_BATTALION_SIZE * 10,
                 Army.SMART_NUMBER_OF_SOLDIERS, Army.SMART_NUMBER_OF_SOLDIERS);
 
         MachineGun<Integer> machineGune = army.getANewMachineGun();
 
-        for (int i = 0; i < 10000000; i++) {
+        for (int i = 0; i < 100000; i++) {
             machineGune.fire(i, "default mission");
         }
 

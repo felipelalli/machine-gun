@@ -7,7 +7,7 @@ import br.fml.eti.machinegun.auditorship.ArmyAudit;
 public class SystemOutAudit implements ArmyAudit {
     @Override
     public void rearSoldierStartsHisJob(long jobId, String soldierName) {
-        System.out.println(jobId + ": " + soldierName + ": starts his job");
+        System.out.println(soldierName + ": starts his job");
     }
 
     @Override
@@ -16,7 +16,7 @@ public class SystemOutAudit implements ArmyAudit {
                                           BuildingException exception,
                                           String message) {
 
-        System.out.println(jobId + ": " + soldierName + ": finishes his job: "
+        System.out.println(soldierName + ": finishes his job: "
                 + success + ", exception: " + exception + ", message: " + message);
     }
 
@@ -38,12 +38,12 @@ public class SystemOutAudit implements ArmyAudit {
 
     @Override
     public void frontLineSoldierStartsHisJob(long jobId, String soldierName) {
-        System.out.println(jobId + ": " + soldierName + ": starts his job");
+        System.out.println(soldierName + ": starts his job");
     }
 
     @Override
     public void frontLineSoldierFinishesHisJob(long jobId, String soldierName) {
-        System.out.println(jobId + ": " + soldierName + ": finishes his job!");
+        System.out.println(soldierName + ": finishes his job!");
     }
 
     @Override
