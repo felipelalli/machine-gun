@@ -2,6 +2,7 @@ package br.fml.eti.machinegun;
 
 import br.fml.eti.behavior.BuildingException;
 import br.fml.eti.behavior.Factory;
+import br.fml.eti.machinegun.auditorship.ArmyAudit;
 
 /**
  * A {@link Target} groups all the information needed to a bullet (data)
@@ -23,8 +24,8 @@ public class Target<T> {
         return queueName;
     }
 
-    public void workOnIt(T data) throws BuildingException {
-        dirtyTaskFactory.buildANewInstance().workOnIt(data);
+    public void workOnIt(ArmyAudit audit, T data) throws BuildingException {
+        dirtyTaskFactory.buildANewInstance().workOnIt(audit, data);
     }
 }
 

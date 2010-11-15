@@ -2,7 +2,6 @@ package br.fml.eti.machinegun;
 
 import br.fml.eti.behavior.Factory;
 import br.fml.eti.machinegun.auditorship.ArmyAudit;
-import br.fml.eti.machinegun.auditorship.LazyArmyAudit;
 import br.fml.eti.machinegun.externaltools.ImportedWeapons;
 
 import java.util.HashMap;
@@ -25,10 +24,10 @@ public class Army extends Factory<MachineGun> {
     /**
      * The default is {@value}.
      */
-    public static final int DEFAULT_BUFFER_SIZE = 256;
+    public static final int DEFAULT_BUFFER_SIZE = 1024;
 
     /**
-     * It will use {@link Runtime#availableProcessors()}<code> - 1</code>
+     * It will use {@link Runtime#availableProcessors()}
      * for <code>frontLineNumberOfSoldiers</code> and
      * {@link Runtime#availableProcessors()}<code> * 3</code>
      * for <code>rearNumberOfSoldiers</code>. 
@@ -39,7 +38,7 @@ public class Army extends Factory<MachineGun> {
      * Create a new Army. See {@link #startNewMission} to have some fun.
      * 
      * @param armyAudit If you want to take control of your Army. See
-     *                  {@link LazyArmyAudit} if you don't need of
+     *                  {@link br.fml.eti.machinegun.auditorship.NegligentAuditor} if you don't need of
      *                  auditorship. This parameter don't accept <code>null</code>.
      *
      * @param importedWeapons Specific implementations.

@@ -5,6 +5,7 @@ import br.fml.eti.machinegun.auditorship.ArmyAudit;
 import br.fml.eti.machinegun.externaltools.Consumer;
 import br.fml.eti.machinegun.externaltools.ImportedWeapons;
 
+import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -42,6 +43,10 @@ public class Mission<BulletType> {
     private BlockingQueue<byte[]> battalion;
     private Thread[] frontLineSoldiers;
     private int rearNumberOfSoldiers;
+    private int battalionSize;
+
+    // aux
+    private Random random = new Random();
 
     public Mission(ArmyAudit armyAudit, ImportedWeapons importedWeapons,
                    Target<BulletType> target, Capsule<BulletType> capsule,
@@ -53,7 +58,8 @@ public class Mission<BulletType> {
         }
 
         if (frontLineNumberOfSoldiers < 1) {
-            frontLineNumberOfSoldiers = Runtime.getRuntime().availableProcessors() - 1;
+            frontLineNumberOfSoldiers
+                    = Runtime.getRuntime().availableProcessors();
 
             if (frontLineNumberOfSoldiers < 1) {
                 frontLineNumberOfSoldiers = 1;
@@ -61,16 +67,20 @@ public class Mission<BulletType> {
         }
 
         if (rearNumberOfSoldiers < 1) {
-            rearNumberOfSoldiers = Runtime.getRuntime().availableProcessors() * 3;
+            rearNumberOfSoldiers
+                    = Runtime.getRuntime().availableProcessors() * 3;
 
-            if (rearNumberOfSoldiers < 2) {
-                rearNumberOfSoldiers = 2;
+            if (rearNumberOfSoldiers < 1) {
+                rearNumberOfSoldiers = 1;
             }
         }
 
         this.target = target;
         this.capsule = capsule;
+        this.armyAudit = armyAudit;
+        this.importedWeapons = importedWeapons;
 
+        this.battalionSize = battalionSize;
         this.battalion = new LinkedBlockingQueue<byte[]>(battalionSize);
         this.frontLineSoldiers = new Thread[frontLineNumberOfSoldiers];
         this.rearNumberOfSoldiers = rearNumberOfSoldiers;
@@ -85,65 +95,111 @@ public class Mission<BulletType> {
      * @param bullet The data to reach the target.
      */
     public void fire(BulletType bullet) throws InterruptedException {
-        this.battalion.put(this.capsule.convertToBytes(bullet));
+        byte[] data = this.capsule.convertToBytes(bullet);
+
+        if (this.battalionSize == 1) {
+            frontLineSoldierWork("forever alone soldier", data);
+        } else {
+            this.battalion.put(data);
+        }
+
+        armyAudit.updateBattalionSize(battalion.size(), battalionSize);
     }
 
     public void startTheMission() {
-        for (int i = 0; i < this.frontLineSoldiers.length; i++) {
-            Thread soldier = new Thread("Front line soldier " + i) {
-                public void run() {
-                    boolean interrupted = false;
+        if (this.battalionSize > 1) { // if it is 1, the only soldier will work immediately
+            for (int i = 0; i < this.frontLineSoldiers.length; i++) {
+                final String soldierName = "Front line soldier " + i;
+                Thread soldier = new Thread(soldierName) {
+                    public void run() {
+                        boolean interrupted = false;
+                        armyAudit.frontLineSoldierIsReady(soldierName);
 
-                    while (!interrupted) {
-                        try {
-                            byte[] data = battalion.take();
-                            putInAEmbeddedQueue(target.getQueueName(), data);
-                        } catch (InterruptedException e) {
-                            interrupted = true;
+                        while (!interrupted) {
+                            try {
+                                byte[] data = battalion.take();
+                                frontLineSoldierWork(soldierName, data);
+                            } catch (InterruptedException e) {
+                                interrupted = true;
+                                armyAudit.frontLineSoldierDied(soldierName);
+                            }
                         }
                     }
-                }
-            };
+                };
 
-            this.frontLineSoldiers[i] = soldier;
-            soldier.start();
+                this.frontLineSoldiers[i] = soldier;
+                soldier.start();
+            }
         }
 
         for (int i = 0; i < this.rearNumberOfSoldiers; i++) {
+            final String soldier = "Rear soldier " + i;
+
             registerAConsumerInEmbeddedQueue(
                     target.getQueueName(),
                     new Consumer() {
                         @Override
                         public void consume(byte[] crudeData) {
-                            BulletType data = capsule.restoreFromBytes(crudeData);
-
-                            try {
-                                target.workOnIt(data);
-                            } catch (BuildingException e) {
-                                // TODO monitoring
-                            }
+                            rearSoldierWork(soldier, crudeData);
                         }
                     });
+
+            armyAudit.rearSoldierIsReady(soldier);
         }
     }
 
+    private void rearSoldierWork(String soldier, byte[] crudeData) {
+        BulletType data = capsule.restoreFromBytes(crudeData);
+        long id = random.nextLong();
+
+        try {
+            armyAudit.rearSoldierStartsHisJob(id, soldier);
+            target.workOnIt(armyAudit, data);
+            // workOnIt MUST call ArmyAudit#rearSoldierFinishesHisJob
+        } catch (BuildingException e) {
+            armyAudit.rearSoldierFinishesHisJob(
+                    id, soldier, false, e,
+                    soldier
+                    + ": dirtyTaskFactory didn't work fine: "
+                    + e);
+        }
+    }
+
+    private void frontLineSoldierWork(String soldierName, byte[] data) {
+        long id = random.nextLong();
+        armyAudit.updateBattalionSize(battalion.size(), battalionSize);
+        armyAudit.frontLineSoldierStartsHisJob(id, soldierName);
+        putInAEmbeddedQueue(target.getQueueName(), data);
+        armyAudit.frontLineSoldierFinishesHisJob(id, soldierName);
+    }
+
+    /**
+     * Kill all front line soldiers.
+     * @throws InterruptedException Because it waits the threads die.
+     */
     public void stopTheMission() throws InterruptedException {
         for (Thread t : frontLineSoldiers) {
-            t.interrupt();
+            if (t != null) {
+                t.interrupt();
+            }
         }
 
         for (Thread t : frontLineSoldiers) {
-            t.join();
+            if (t != null) {
+                t.join();
+            }
         }
     }
 
     private void putInAEmbeddedQueue(String queueName, byte[] data) {
-        // TODO
+        importedWeapons.getQueueManager()
+                .putInAEmbeddedQueue(armyAudit, queueName, data);
     }
 
     private void registerAConsumerInEmbeddedQueue(
             String queueName, Consumer consumer) {
-        
-        // TODO
+
+        importedWeapons.getQueueManager()
+                .registerAConsumerInEmbeddedQueue(armyAudit, queueName, consumer);
     }    
 }

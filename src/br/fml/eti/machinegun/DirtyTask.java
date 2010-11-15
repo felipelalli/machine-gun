@@ -1,5 +1,7 @@
 package br.fml.eti.machinegun;
 
+import br.fml.eti.machinegun.auditorship.ArmyAudit;
+
 /**
  * An expensive task.
  *
@@ -9,6 +11,9 @@ package br.fml.eti.machinegun;
 public interface DirtyTask<T> {
     /**
      * It can take a loooong time!
+     *
+     * @param audit Details of processing. <b>The specific implementation
+     *              MUST call the method {@link ArmyAudit#rearSoldierFinishesHisJob}</b>.
      */
-    public void workOnIt(T dataToBeProcessed);
+    public void workOnIt(ArmyAudit audit, T dataToBeProcessed);
 }
