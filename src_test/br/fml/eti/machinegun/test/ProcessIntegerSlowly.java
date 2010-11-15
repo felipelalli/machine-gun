@@ -19,7 +19,7 @@ public class ProcessIntegerSlowly extends Factory<DirtyTask<Integer>> {
         public void workOnIt(long jobId, String soldierName,
                              ArmyAudit audit, Integer dataToBeProcessed) {
 
-            Integer time = random.nextInt(10);
+            Integer time = random.nextInt(2);
             System.out.println("*** Will process " + dataToBeProcessed
                     + " for " + time + " millis...");
 
