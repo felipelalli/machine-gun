@@ -5,8 +5,7 @@ First, /machine-gun/ will put everything in an (limited) internal buffer,
 after some consumers will put it in an internal persisted queue to
 finally, others consumers do the expensive operation.
 
-Everything can be externally monitored, specially the operations times
-mensured in nano seconds.
+Everything can be externally monitored through an army audit.
 
       .
       ,,                        __,--.

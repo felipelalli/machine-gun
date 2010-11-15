@@ -4,3 +4,7 @@
 # Project files
 .idea/
 *.iml
+
+# Compile generated files
+out/
+deploy/

@@ -13,8 +13,8 @@ import java.util.concurrent.LinkedBlockingQueue;
  * <p>
  * A {@link Mission} knows his {@link Target} and keep
  * working with his soldiers (thread consumers) to make the "bullet" (data)
- * reach your right destination. A {@link Mission} is good only with a
- * kind of bullet.
+ * reach your right destination. A captain of a {@link Mission}
+ * is good only with a kind of bullet.
  * </p>
  * <p>
  * In a less abstract, a {@link Mission} is a group of {@link Thread threads}
