@@ -95,15 +95,19 @@ public class Mission<BulletType> {
      * @param bullet The data to reach the target.
      */
     public void fire(BulletType bullet) throws InterruptedException {
-        byte[] data = this.capsule.convertToBytes(bullet);
+        try {
+            byte[] data = this.capsule.convertToBytes(bullet);
 
-        if (this.battalionSize == 1) {
-            frontLineSoldierWork("forever alone soldier", data);
-        } else {
-            this.battalion.put(data);
+            if (this.battalionSize == 1) {
+                frontLineSoldierWork("forever alone soldier", data);
+            } else {
+                this.battalion.put(data);
+            }
+
+            armyAudit.updateBattalionSize(battalion.size(), battalionSize);
+        } catch (WrongCapsuleException e) {
+            armyAudit.errorOnBulletCapsule(e);
         }
-
-        armyAudit.updateBattalionSize(battalion.size(), battalionSize);
     }
 
     public void startTheMission() {
@@ -149,19 +153,23 @@ public class Mission<BulletType> {
     }
 
     private void rearSoldierWork(String soldier, byte[] crudeData) {
-        BulletType data = capsule.restoreFromBytes(crudeData);
-        long id = random.nextLong();
-
         try {
-            armyAudit.rearSoldierStartsHisJob(id, soldier);
-            target.workOnIt(id, armyAudit, data);
-            // workOnIt MUST call ArmyAudit#rearSoldierFinishesHisJob
-        } catch (BuildingException e) {
-            armyAudit.rearSoldierFinishesHisJob(
-                    id, soldier, false, e,
-                    soldier
-                    + ": dirtyTaskFactory didn't work fine: "
-                    + e);
+            BulletType data = capsule.restoreFromBytes(crudeData);
+            long id = random.nextLong();
+
+            try {
+                armyAudit.rearSoldierStartsHisJob(id, soldier);
+                target.workOnIt(id, soldier, armyAudit, data);
+                // workOnIt MUST call ArmyAudit#rearSoldierFinishesHisJob
+            } catch (BuildingException e) {
+                armyAudit.rearSoldierFinishesHisJob(
+                        id, soldier, false, e,
+                        soldier
+                        + ": dirtyTaskFactory didn't work fine: "
+                        + e);
+            }
+        } catch (WrongCapsuleException e) {
+            armyAudit.errorOnBulletCapsule(e);
         }
     }
 

@@ -1,6 +1,7 @@
 package br.fml.eti.machinegun.auditorship;
 
 import br.fml.eti.behavior.BuildingException;
+import br.fml.eti.machinegun.WrongCapsuleException;
 
 /**
  * A {@link NegligentAuditor} do nothing. Use it if you think the
@@ -56,5 +57,10 @@ public class NegligentAuditor implements ArmyAudit {
     @Override
     public void rearSoldierDied(String soldierName) {
        
+    }
+
+    @Override
+    public void errorOnBulletCapsule(WrongCapsuleException e) {
+        
     }
 }

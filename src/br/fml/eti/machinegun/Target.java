@@ -24,10 +24,10 @@ public class Target<T> {
         return queueName;
     }
 
-    public void workOnIt(long idJob, ArmyAudit audit, T data)
+    public void workOnIt(long idJob, String soldier, ArmyAudit audit, T data)
             throws BuildingException {
 
-        dirtyTaskFactory.buildANewInstance().workOnIt(idJob, audit, data);
+        dirtyTaskFactory.buildANewInstance().workOnIt(idJob, soldier, audit, data);
     }
 }
 

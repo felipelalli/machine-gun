@@ -1,6 +1,7 @@
 package br.fml.eti.machinegun.auditorship;
 
 import br.fml.eti.behavior.BuildingException;
+import br.fml.eti.machinegun.WrongCapsuleException;
 
 /**
  * Everything that happens in {@link br.fml.eti.machinegun.Army}
@@ -93,5 +94,13 @@ public interface ArmyAudit {
      * It happens when a mission finished.
      * @param soldierName The thread's name.
      */
-    void rearSoldierDied(String soldierName);    
+    void rearSoldierDied(String soldierName);
+
+    /**
+     * Happens when something went wrong in data conversion.
+     * @see br.fml.eti.machinegun.Capsule
+     * @see br.fml.eti.machinegun.WrongCapsuleException
+     * @param e Exception
+     */
+    void errorOnBulletCapsule(WrongCapsuleException e);
 }

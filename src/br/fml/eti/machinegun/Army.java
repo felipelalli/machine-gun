@@ -8,10 +8,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Produces {@link MachineGun machine guns}. Also, organize the soldiers
+ * <p>Produces {@link MachineGun machine guns}. Also, organize the soldiers
  * ({@link Thread threads}) to let the bullet (data) reach the right destination. 
  * Bullets are data, and bullets are from a specific type.
- * A machine gun is a way to make this process very fast, asynchronously.
+ * A machine gun is a way to make this process very fast, asynchronously.</p>
+ * <p>Before take a new machine gun, don't forget to
+ * {@link #startNewMission start a mission}.</p>
  *
  * @author Felipe Micaroni Lalli (micaroni@gmail.com)
  *         Nov 15, 2010 6:15:37 AM
@@ -22,17 +24,19 @@ public class Army extends Factory<MachineGun> {
     private ImportedWeapons importedWeapons;
 
     /**
-     * The default is {@value}.
+     * The default is {@value}. Battalion size is the internal
+     * buffer size.
      */
-    public static final int DEFAULT_BUFFER_SIZE = 1024;
+    public static final int DEFAULT_BATTALION_SIZE = 1024;
 
     /**
      * It will use {@link Runtime#availableProcessors()}
      * for <code>frontLineNumberOfSoldiers</code> and
      * {@link Runtime#availableProcessors()}<code> * 3</code>
-     * for <code>rearNumberOfSoldiers</code>. 
+     * for <code>rearNumberOfSoldiers</code>. The soldiers are the
+     * threads to consume the volume of data.
      */
-    public static final int SMART_NUMBER_OF_CONSUMERS = 0;
+    public static final int SMART_NUMBER_OF_SOLDIERS = 0;
 
     /**
      * Create a new Army. See {@link #startNewMission} to have some fun.
@@ -82,7 +86,7 @@ public class Army extends Factory<MachineGun> {
      *                      If the buffer is full, the {@link MachineGun#fire}
      *                      function will be blocked until the consumers
      *                      can drain the volume. You can use
-     *                      {@link #DEFAULT_BUFFER_SIZE}. Set
+     *                      {@link #DEFAULT_BATTALION_SIZE}. Set
      *                      high values if you have high available memory
      *                      and don't care so much about lost some data.
      *                      <i>Remember that what is on the buffer will not be
@@ -91,14 +95,14 @@ public class Army extends Factory<MachineGun> {
      *
      * @param frontLineNumberOfSoldiers The number of thread consumers to read from
      *                                   internal buffer and put on internal
-     *                                   queue. Use {@link #SMART_NUMBER_OF_CONSUMERS}
+     *                                   queue. Use {@link #SMART_NUMBER_OF_SOLDIERS}
      *                                   to make the MachineGun calculates based
      *                                   on your {@link Runtime#availableProcessors()
      *                                   available processors}.
      *
      * @param rearNumberOfSoldiers The number of embedded queue thread consumers.
      *                              This consumers will do the dirty and hard workOnIt.
-     *                              Use {@link #SMART_NUMBER_OF_CONSUMERS}
+     *                              Use {@link #SMART_NUMBER_OF_SOLDIERS}
      *                              to make the MachineGun calculates based
      *                              on your {@link Runtime#availableProcessors()
      *                              available processors}.
@@ -151,7 +155,8 @@ public class Army extends Factory<MachineGun> {
             public void fire(T bullet, String missionName)
                     throws UnregisteredMissionException, InterruptedException {
 
-                Mission mission = missions.get(missionName);
+                @SuppressWarnings(value = "unchecked")
+                Mission<T> mission = missions.get(missionName);
 
                 if (mission == null) {
                     throw new UnregisteredMissionException("The mission '"

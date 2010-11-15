@@ -1,6 +1,7 @@
 package br.fml.eti.machinegun.test;
 
 import br.fml.eti.behavior.BuildingException;
+import br.fml.eti.machinegun.WrongCapsuleException;
 import br.fml.eti.machinegun.auditorship.ArmyAudit;
 
 public class SystemOutAudit implements ArmyAudit {
@@ -53,5 +54,11 @@ public class SystemOutAudit implements ArmyAudit {
     @Override
     public void rearSoldierDied(String soldierName) {
         System.out.println(soldierName + " died!");
+    }
+
+    @Override
+    public void errorOnBulletCapsule(WrongCapsuleException e) {
+        System.out.println("Error: " + e);
+        e.printStackTrace();
     }
 }

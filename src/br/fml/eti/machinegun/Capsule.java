@@ -16,6 +16,6 @@ package br.fml.eti.machinegun;
  *         Nov 15, 2010 6:51:35 AM
  */
 public interface Capsule<T> {
-    T restoreFromBytes(byte[] data);
-    byte[] convertToBytes(T data);
+    T restoreFromBytes(byte[] data) throws WrongCapsuleException;
+    byte[] convertToBytes(T data) throws WrongCapsuleException;
 }

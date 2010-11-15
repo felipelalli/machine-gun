@@ -13,9 +13,10 @@ public interface DirtyTask<T> {
      * It can take a loooong long time!
      *
      * @param jobId The job identity to be called by <code>audit</code>.
+     * @param soldierName To be used by <code>audit</code>.
      * @param dataToBeProcessed data ("bullet")
      * @param audit Details of processing. <b>The specific implementation
      *              MUST call the method {@link ArmyAudit#rearSoldierFinishesHisJob}</b>.
      */
-    public void workOnIt(long jobId, ArmyAudit audit, T dataToBeProcessed);
+    public void workOnIt(long jobId, String soldierName, ArmyAudit audit, T dataToBeProcessed);
 }
