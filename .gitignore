@@ -9,3 +9,4 @@
 # Compile generated files
 out/
 deploy/
+doc/javadoc/
