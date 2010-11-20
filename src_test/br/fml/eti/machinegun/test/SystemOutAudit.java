@@ -41,4 +41,16 @@ public class SystemOutAudit implements ArmyAudit {
         System.out.println("Error: " + e);
         e.printStackTrace();
     }
+
+    @Override
+    public void errorWhenPuttingIntoAnEmbeddedQueue(Exception e) {
+        System.out.println("Error: " + e);
+        e.printStackTrace();
+    }
+
+    @Override
+    public void errorWhenRegisteringANewConsumerInAnEmbeddedQueue(Exception e) {
+        System.out.println("Error: " + e);
+        e.printStackTrace();
+    }
 }

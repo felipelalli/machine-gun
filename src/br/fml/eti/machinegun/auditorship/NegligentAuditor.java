@@ -51,4 +51,14 @@ public class NegligentAuditor implements ArmyAudit {
     public void errorOnDataSerialization(WrongCapsuleException e) {
         
     }
+
+    @Override
+    public void errorWhenPuttingIntoAnEmbeddedQueue(Exception e) {
+
+    }
+
+    @Override
+    public void errorWhenRegisteringANewConsumerInAnEmbeddedQueue(Exception e) {
+
+    }
 }
