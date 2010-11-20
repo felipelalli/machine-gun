@@ -107,7 +107,7 @@ public class Army extends Factory<MachineGun> {
      *                "bullet" (data) intact through the way to
      *                the target. It have to be able to convert a data
      *                to a byte array and vice-versa. If you are really lazy,
-     *                see {@link br.fml.eti.machinegun.util.GenericImplementationOfCapsuleForLazyPeople}.
+     *                see {@link br.fml.eti.machinegun.util.CapsuleGenericImplForLazyPeople}.
      *
      * @param volatileBufferSize It is the <b>internal buffer size</b>.
      *                      If the buffer is full, the {@link MachineGun#fire}
@@ -148,6 +148,9 @@ public class Army extends Factory<MachineGun> {
         mission.startTheMission();
     }
 
+    /**
+     * Stop all missions.
+     */
     public void finalize() throws Throwable {
         for (String mission : this.missions.keySet()) {
             this.stopTheMission(mission);
@@ -156,6 +159,13 @@ public class Army extends Factory<MachineGun> {
         super.finalize();
     }
 
+    /**
+     * Stop a specific mission.
+     *
+     * @param missionName The mission name used when you have started a mission.
+     * @throws InterruptedException Because it will wait for every consumer die.
+     * @throws UnregisteredMissionException If the mission was not started before.
+     */
     public void stopTheMission(String missionName) throws
             InterruptedException, UnregisteredMissionException {
 

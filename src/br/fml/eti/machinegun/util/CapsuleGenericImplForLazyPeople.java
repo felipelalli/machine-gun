@@ -18,7 +18,7 @@ import java.io.*;
  * @author Felipe Micaroni Lalli (micaroni@gmail.com)
  *         Nov 20, 2010 4:54:03 PM
  */
-public class GenericImplementationOfCapsuleForLazyPeople<T extends Serializable>
+public class CapsuleGenericImplForLazyPeople<T extends Serializable>
         extends Factory<Capsule<T>> {
 
     @Override
