@@ -24,10 +24,13 @@ public class Target<T> {
         return queueName;
     }
 
-    public void workOnIt(long idJob, String soldier, ArmyAudit audit, T data)
+    /**
+     * Creates a {@link DirtyWork} and delegate the action to it.
+     */
+    public void workOnIt(long idJob, String consumerName, ArmyAudit audit, T data)
             throws BuildingException {
 
-        dirtyWorkFactory.buildANewInstance().workOnIt(idJob, soldier, audit, data);
+        dirtyWorkFactory.buildANewInstance().workOnIt(idJob, consumerName, audit, data);
     }
 }
 

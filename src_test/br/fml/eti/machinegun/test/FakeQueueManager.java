@@ -25,7 +25,7 @@ public class FakeQueueManager implements PersistedQueueManager {
     private boolean end = false;
 
     @Override
-    public void putInAEmbeddedQueue(ArmyAudit armyAudit,
+    public void putIntoAnEmbeddedQueue(ArmyAudit armyAudit,
                                     String queueName, byte[] data)
             throws InterruptedException {
 
@@ -48,7 +48,7 @@ public class FakeQueueManager implements PersistedQueueManager {
     int size = 0;
 
     @Override
-    public void registerAConsumerInEmbeddedQueue(final ArmyAudit armyAudit,
+    public void registerANewConsumerInAnEmbeddedQueue(final ArmyAudit armyAudit,
                                                  final String queueName,
                                                  final Consumer consumer) {
 

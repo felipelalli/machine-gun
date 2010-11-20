@@ -27,28 +27,8 @@ public class SystemOutAudit implements ArmyAudit {
     }
 
     @Override
-    public void frontLineSoldierIsReady(String soldierName) {
-        System.out.println(soldierName + " is ready!");
-    }
-
-    @Override
     public void consumerIsReady(String consumerName) {
         System.out.println(consumerName + " is ready!");
-    }
-
-    @Override
-    public void frontLineSoldierStartsHisJob(long jobId, String soldierName) {
-        System.out.println(soldierName + ": starts his job");
-    }
-
-    @Override
-    public void frontLineSoldierFinishesHisJob(long jobId, String soldierName) {
-        System.out.println(soldierName + ": finishes his job!");
-    }
-
-    @Override
-    public void frontLineSoldierDied(String soldierName) {
-        System.out.println(soldierName + " died!");
     }
 
     @Override

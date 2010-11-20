@@ -10,7 +10,11 @@ import br.fml.eti.machinegun.auditorship.ArmyAudit;
  */
 public interface DirtyWork<T> {
     /**
-     * It can take a loooong long time!
+     * <p>This operation can take a loooong long time!</p>
+     * <p>
+     * It needs to call {@link ArmyAudit#aConsumerHasBeenFinishedHisJob} after
+     * the dirty work finishes.
+     * </p>
      *
      * @param jobId The job identity to be called by <code>audit</code>.
      * @param soldierName To be used by <code>audit</code>.

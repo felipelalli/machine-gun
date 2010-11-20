@@ -8,11 +8,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * <p>Produces {@link MachineGun machine guns}. Also, organize the soldiers
- * ({@link Thread threads}) to let the bullet (data) reach the right destination. 
+ * <p>Produces {@link MachineGun machine guns}. Also, organize the thread consumers
+ * to let the bullet (data) reach the specified target. 
  * Bullets are data, and bullets are from a specific type.
- * A machine gun is a way to make this process very fast, asynchronously.</p>
- * <p>Before take a new machine gun, don't forget to
+ * A <i>machine gun</i> is a way to make this processing <u>very fast</u>,
+ * asynchronously.</p>
+ * <p>Before of take a new machine gun, don't forget to
  * {@link #startNewMission start a mission}.</p>
  *
  * @author Felipe Micaroni Lalli (micaroni@gmail.com)

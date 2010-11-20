@@ -88,4 +88,18 @@ public interface ArmyAudit {
      * @param e Exception
      */
     void errorOnDataSerialization(WrongCapsuleException e);
+
+    /**
+     * Is called if something went wrong on
+     * {@link br.fml.eti.machinegun.externaltools.PersistedQueueManager#putIntoAnEmbeddedQueue}.
+     * @param e The cause
+     */
+    void errorWhenPuttingIntoAnEmbeddedQueue(Exception e);
+
+    /**
+     * Is called if something went wrong on
+     * {@link br.fml.eti.machinegun.externaltools.PersistedQueueManager#putIntoAnEmbeddedQueue}.
+     * @param e The cause
+     */    
+    void errorWhenRegisteringANewConsumerInAnEmbeddedQueue(Exception e);
 }
