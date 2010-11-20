@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
  * (front line soldiers) consuming the first internal buffer to put the data
  * (bullets) into a embedded queue. Also, there are some {@link Thread threads}
  * (rear soldiers) consuming from this queue to execute the
- * {@link DirtyTask dirty task} associated with the kind of bullet (data).
+ * {@link DirtyWork dirty work} associated with the kind of bullet (data).
  * </p>
  * <p>
  * A Mission will wait until the method {@link #startTheMission()} is called.
@@ -41,10 +41,10 @@ public class Mission<BulletType> {
     private Capsule<BulletType> capsule;
 
     // consumers
-    private BlockingQueue<byte[]> battalion;
+    private BlockingQueue<byte[]> buffer;
     private Thread[] frontLineSoldiers;
     private int rearNumberOfSoldiers;
-    private int battalionSize;
+    private int bufferSize;
 
     // aux
     private Random random = new Random();
@@ -52,11 +52,11 @@ public class Mission<BulletType> {
 
     public Mission(ArmyAudit armyAudit, ImportedWeapons importedWeapons,
                    Target<BulletType> target, Capsule<BulletType> capsule,
-                   int battalionSize, int frontLineNumberOfSoldiers,
+                   int bufferSize, int frontLineNumberOfSoldiers,
                    int rearNumberOfSoldiers) {
 
-        if (battalionSize < 1) {
-            throw new IllegalArgumentException("battalion size (buffer size) must be one or more.");
+        if (bufferSize < 1) {
+            throw new IllegalArgumentException("buffer size (buffer size) must be one or more.");
         }
 
         if (frontLineNumberOfSoldiers < 1) {
@@ -82,14 +82,14 @@ public class Mission<BulletType> {
         this.armyAudit = armyAudit;
         this.importedWeapons = importedWeapons;
 
-        this.battalionSize = battalionSize;
-        this.battalion = new LinkedBlockingQueue<byte[]>(battalionSize);
+        this.bufferSize = bufferSize;
+        this.buffer = new LinkedBlockingQueue<byte[]>(bufferSize);
         this.frontLineSoldiers = new Thread[frontLineNumberOfSoldiers];
         this.rearNumberOfSoldiers = rearNumberOfSoldiers;
     }
 
     /**
-     * If the battalion (internal buffer) is busy, this function
+     * If the buffer (internal buffer) is busy, this function
      * will block indefinitely. But because it uses a asynchronous embedded
      * queue, it should be very fast and non block function.
      *
@@ -100,40 +100,37 @@ public class Mission<BulletType> {
         try {
             byte[] data = this.capsule.convertToBytes(bullet);
 
-            if (this.battalionSize == 1) {
-                frontLineSoldierWork("forever alone soldier", data);
+            if (this.bufferSize == 1) {
+                internalBufferConsumerDoWork(data);
             } else {
-                this.battalion.put(data);
+                this.buffer.put(data);
             }
 
-            armyAudit.updateBattalionSize(battalion.size(), battalionSize);
+            armyAudit.updatePreBufferCurrentSize(buffer.size(), bufferSize);
         } catch (WrongCapsuleException e) {
-            armyAudit.errorOnBulletCapsule(e);
+            armyAudit.errorOnDataSerialization(e);
         }
     }
 
     public void startTheMission() {
-        if (this.battalionSize > 1) { // if it is 1, the only soldier will work immediately
+        if (this.bufferSize > 1) { // if it is 1, the only soldier will work immediately
             for (int i = 0; i < this.frontLineSoldiers.length; i++) {
-                final String soldierName = "Front line soldier " + i;
-                Thread soldier = new Thread(soldierName) {
-                    public void run() {
-                        boolean interrupted = false;
-                        armyAudit.frontLineSoldierIsReady(soldierName);
+                String threadName = "Internal buffer consumer "
+                        + (i+1) + " of " + bufferSize;
 
-                        while (!end || battalion.size() > 0) {
+                Thread soldier = new Thread(threadName) {
+                    public void run() {
+                        while (!end || buffer.size() > 0) {
                             try {
-                                byte[] data = battalion.poll(5, TimeUnit.SECONDS);
+                                byte[] data = buffer.poll(5, TimeUnit.SECONDS);
 
                                 if (data != null) {
-                                    frontLineSoldierWork(soldierName, data);
+                                    internalBufferConsumerDoWork(data);
                                 }
                             } catch (InterruptedException e) {
                                 end = true;
                             }
                         }
-
-                        armyAudit.frontLineSoldierDied(soldierName);
                     }
                 };
 
@@ -154,7 +151,7 @@ public class Mission<BulletType> {
                         }
                     });
 
-            armyAudit.rearSoldierIsReady(soldier);
+            armyAudit.consumerIsReady(soldier);
         }
     }
 
@@ -164,29 +161,26 @@ public class Mission<BulletType> {
             long id = random.nextLong();
 
             try {
-                armyAudit.rearSoldierStartsHisJob(id, soldier);
+                armyAudit.aConsumerStartsHisJob(id, soldier);
                 target.workOnIt(id, soldier, armyAudit, data);
-                // workOnIt MUST call ArmyAudit#rearSoldierFinishesHisJob
+                // workOnIt MUST call ArmyAudit#aConsumerHasBeenFinishedHisJob
             } catch (BuildingException e) {
-                armyAudit.rearSoldierFinishesHisJob(
+                armyAudit.aConsumerHasBeenFinishedHisJob(
                         id, soldier, false, e,
                         soldier
-                        + ": dirtyTaskFactory didn't work fine: "
+                        + ": dirtyWorkFactory didn't work fine: "
                         + e);
             }
         } catch (WrongCapsuleException e) {
-            armyAudit.errorOnBulletCapsule(e);
+            armyAudit.errorOnDataSerialization(e);
         }
     }
 
-    private void frontLineSoldierWork(String soldierName, byte[] data)
+    private void internalBufferConsumerDoWork(byte[] data)
             throws InterruptedException {
-        
-        long id = random.nextLong();
-        armyAudit.updateBattalionSize(battalion.size(), battalionSize);
-        armyAudit.frontLineSoldierStartsHisJob(id, soldierName);
+
+        armyAudit.updatePreBufferCurrentSize(buffer.size(), bufferSize);
         putInAEmbeddedQueue(target.getQueueName(), data);
-        armyAudit.frontLineSoldierFinishesHisJob(id, soldierName);
     }
 
     /**

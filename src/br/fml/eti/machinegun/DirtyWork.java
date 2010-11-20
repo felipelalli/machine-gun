@@ -8,7 +8,7 @@ import br.fml.eti.machinegun.auditorship.ArmyAudit;
  * @author Felipe Micaroni Lalli (micaroni@gmail.com)
  *         Nov 15, 2010 7:27:08 AM
  */
-public interface DirtyTask<T> {
+public interface DirtyWork<T> {
     /**
      * It can take a loooong long time!
      *
@@ -16,7 +16,7 @@ public interface DirtyTask<T> {
      * @param soldierName To be used by <code>audit</code>.
      * @param dataToBeProcessed data ("bullet")
      * @param audit Details of processing. <b>The specific implementation
-     *              MUST call the method {@link ArmyAudit#rearSoldierFinishesHisJob}</b>.
+     *              MUST call the method {@link ArmyAudit#aConsumerHasBeenFinishedHisJob}</b>.
      */
     public void workOnIt(long jobId, String soldierName, ArmyAudit audit, T dataToBeProcessed);
 }

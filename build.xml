@@ -16,7 +16,7 @@
     </path>
 
     <target name="help">
-        <echo message="Use ant -projecthelp to see all options"/>
+        <echo resultDetails="Use ant -projecthelp to see all options"/>
     </target>
 
     <target name="init">

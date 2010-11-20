@@ -6,22 +6,22 @@ import br.fml.eti.machinegun.auditorship.ArmyAudit;
 
 public class SystemOutAudit implements ArmyAudit {
     @Override
-    public void rearSoldierStartsHisJob(long jobId, String soldierName) {
-        System.out.println(soldierName + ": starts his job");
+    public void aConsumerStartsHisJob(long jobId, String consumerName) {
+        System.out.println(consumerName + ": starts his job");
     }
 
     @Override
-    public void rearSoldierFinishesHisJob(long jobId, String soldierName,
+    public void aConsumerHasBeenFinishedHisJob(long jobId, String consumerName,
                                           boolean success,
                                           BuildingException exception,
-                                          String message) {
+                                          String resultDetails) {
 
-        System.out.println(soldierName + ": finishes his job: "
-                + success + ", exception: " + exception + ", message: " + message);
+        System.out.println(consumerName + ": finishes his job: "
+                + success + ", exception: " + exception + ", resultDetails: " + resultDetails);
     }
 
     @Override
-    public void updateBattalionSize(int newSize, int maxSize) {
+    public void updatePreBufferCurrentSize(int newSize, int maxSize) {
         System.out.println(newSize + " of " + maxSize + ": "
                 + (newSize * 100 / maxSize) + "%");
     }
@@ -32,8 +32,8 @@ public class SystemOutAudit implements ArmyAudit {
     }
 
     @Override
-    public void rearSoldierIsReady(String soldierName) {
-        System.out.println(soldierName + " is ready!");
+    public void consumerIsReady(String consumerName) {
+        System.out.println(consumerName + " is ready!");
     }
 
     @Override
@@ -52,12 +52,12 @@ public class SystemOutAudit implements ArmyAudit {
     }
 
     @Override
-    public void rearSoldierDied(String soldierName) {
-        System.out.println(soldierName + " died!");
+    public void consumerHasBeenStopped(String consumerName) {
+        System.out.println(consumerName + " died!");
     }
 
     @Override
-    public void errorOnBulletCapsule(WrongCapsuleException e) {
+    public void errorOnDataSerialization(WrongCapsuleException e) {
         System.out.println("Error: " + e);
         e.printStackTrace();
     }

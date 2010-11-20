@@ -3,6 +3,6 @@ package machineguntest;
 option java_package = "br.fml.eti.machinegun.test";
 option java_outer_classname = "DataInteger";
 
-message DataIntegerMessage {
+resultDetails DataIntegerMessage {
   optional int32 onlyData = 1;
 }

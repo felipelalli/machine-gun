@@ -13,11 +13,11 @@ import br.fml.eti.machinegun.auditorship.ArmyAudit;
  */
 public class Target<T> {
     private String queueName;
-    private Factory<DirtyTask<T>> dirtyTaskFactory;
+    private Factory<DirtyWork<T>> dirtyWorkFactory;
 
-    public Target(String queueName, Factory<DirtyTask<T>> dirtyTaskFactory) {
+    public Target(String queueName, Factory<DirtyWork<T>> dirtyWorkFactory) {
         this.queueName = queueName;
-        this.dirtyTaskFactory = dirtyTaskFactory;
+        this.dirtyWorkFactory = dirtyWorkFactory;
     }
 
     public String getQueueName() {
@@ -27,7 +27,7 @@ public class Target<T> {
     public void workOnIt(long idJob, String soldier, ArmyAudit audit, T data)
             throws BuildingException {
 
-        dirtyTaskFactory.buildANewInstance().workOnIt(idJob, soldier, audit, data);
+        dirtyWorkFactory.buildANewInstance().workOnIt(idJob, soldier, audit, data);
     }
 }
 

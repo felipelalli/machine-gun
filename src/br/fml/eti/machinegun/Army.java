@@ -60,9 +60,9 @@ public class Army extends Factory<MachineGun> {
     }
 
     /**
-     * Associates a {@link Mission} with a {@link DirtyTask dirty task}
+     * Associates a {@link Mission} with a {@link DirtyWork dirty work}
      * {@link Factory factory}. You have to use different queues to each
-     * dirty task factory; in other words: each queue will transport only
+     * dirty work factory; in other words: each queue will transport only
      * the same kind of data. This function will create
      *
      * @param missionName The mission name. Can be the same of queueName.
@@ -72,9 +72,9 @@ public class Army extends Factory<MachineGun> {
      *                  a JMS based queue, it is the
      *                  <code>javax.jms.Queue#getQueueName()</code>.
      *
-     * @param dirtyTaskFactory the associated factory of dirties tasks. When the
+     * @param dirtyWorkFactory the associated factory of dirties tasks. When the
      *                         "bullet" (data) reaches the target, the
-     *                         {@link DirtyTask dirty task} will be executed
+     *                         {@link DirtyWork dirty work} will be executed
      *                         on the data.
      *
      * @param capsule A {@link Capsule} is a way to keep the
@@ -108,13 +108,13 @@ public class Army extends Factory<MachineGun> {
      *                              available processors}.
      */
     public <T> void startNewMission(String missionName, String queueName,
-                               Factory<DirtyTask<T>> dirtyTaskFactory,
+                               Factory<DirtyWork<T>> dirtyWorkFactory,
                                Capsule<T> capsule,
                                int battalionSize,
                                int frontLineNumberOfSoldiers,
                                int rearNumberOfSoldiers) {
 
-        Target<T> target = new Target<T>(queueName, dirtyTaskFactory);
+        Target<T> target = new Target<T>(queueName, dirtyWorkFactory);
         Mission<T> mission = new Mission<T>(armyAudit, importedWeapons,
                 target, capsule, battalionSize,
                 frontLineNumberOfSoldiers, rearNumberOfSoldiers);

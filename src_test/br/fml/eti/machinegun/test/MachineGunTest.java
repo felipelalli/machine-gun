@@ -3,11 +3,7 @@ package br.fml.eti.machinegun.test;
 import br.fml.eti.machinegun.Army;
 import br.fml.eti.machinegun.MachineGun;
 import br.fml.eti.machinegun.externaltools.ImportedWeapons;
-import br.fml.eti.machinegun.test.mocks.FakeQueueManager;
 import org.junit.Test;
-
-import java.util.LinkedHashSet;
-import java.util.Random;
 
 public class MachineGunTest {
     @Test public void test() throws Exception {

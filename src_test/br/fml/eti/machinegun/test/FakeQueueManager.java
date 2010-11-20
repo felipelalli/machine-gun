@@ -1,10 +1,9 @@
-package br.fml.eti.machinegun.test.mocks;
+package br.fml.eti.machinegun.test;
 
 import br.fml.eti.machinegun.auditorship.ArmyAudit;
 import br.fml.eti.machinegun.externaltools.Consumer;
-import br.fml.eti.machinegun.externaltools.QueueManager;
+import br.fml.eti.machinegun.externaltools.PersistedQueueManager;
 
-import javax.naming.directory.Attributes;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +16,7 @@ import java.util.concurrent.TimeUnit;
  * @author Felipe Micaroni Lalli (micaroni@gmail.com)
  *         Nov 15, 2010 6:19:53 PM
  */
-public class FakeQueueManager implements QueueManager {
+public class FakeQueueManager implements PersistedQueueManager {
     private Map<String, BlockingQueue<byte[]>> queues
             = new HashMap<String,  BlockingQueue<byte[]>>();
 
@@ -69,7 +68,7 @@ public class FakeQueueManager implements QueueManager {
                     }
                 }
 
-                armyAudit.rearSoldierDied(Thread.currentThread().getName());
+                armyAudit.consumerHasBeenStopped(Thread.currentThread().getName());
             }
         };
 

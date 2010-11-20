@@ -4,103 +4,88 @@ import br.fml.eti.behavior.BuildingException;
 import br.fml.eti.machinegun.WrongCapsuleException;
 
 /**
- * Everything that happens in {@link br.fml.eti.machinegun.Army}
- * will related here.
+ * <p>
+ * Almost everything that happens in {@link br.fml.eti.machinegun.Army}
+ * is reported here, don't worry. Some things will not be reported due
+ * these things are internal implementations with constant time, as the
+ * internal buffer consumers, e.g.
+ * </p>
+ * <pre>
+ *               ,
+     __  _.-"` `'-.
+    /||\'._ __{}_(
+    ||||  |'--.__\
+    |  L.(   ^_\^
+    \ .-' |   _ |
+    | |   )\___/
+    |  \-'`:._]
+jgs \__/;      '-.
+ </pre>
  *
  * @author Felipe Micaroni Lalli (micaroni@gmail.com)
  *         Nov 15, 2010 4:17:13 PM
  */
 public interface ArmyAudit {
     /**
-     * When a "rear soldier" &ndash; i.e., a embedded
-     * queue consumer &ndash; found a element
-     * to consume and will start to do the
-     * {@link br.fml.eti.machinegun.DirtyTask dirty task}.
+     * When a consumer found an element
+     * to consume and starts to execute the
+     * {@link br.fml.eti.machinegun.DirtyWork dirty work}.
      *
-     * @param soldierName A soldier name like "Rear soldier 2".
+     * @param consumerName A consumer name like "Consumer 2 of 8".
      * @param jobId To identify the job. Useful if you want to measure the
-     *              time between the start and end. 
+     *              time between start and end events.
      */
-    void rearSoldierStartsHisJob(long jobId, String soldierName);
+    void aConsumerStartsHisJob(long jobId, String consumerName);
 
     /**
-     * When a "rear soldier" &ndash; i.e., a embedded
-     * queue consumer &ndash; finished to do the
-     * {@link br.fml.eti.machinegun.DirtyTask dirty task}.
+     * Soon after a consumer finishes his
+     * {@link br.fml.eti.machinegun.DirtyWork job}.
      *
-     * @param soldierName A soldier name like "Rear soldier 2".
+     * @param consumerName A consumer name like "Consumer 2 of 8".
      * @param success <code>true</code> if everything was OK
-     * @param exception if <code>success</code> is <code>false</<code> this exception
+     * @param exception if <code>success</code> is <code>false</<code>, this exception
      *          can be different of <code>null</code>. It will be <code>null</code>
      *          if <code>success</code> is <code>true</code>.
-     * @param message A message giving details of operation.
+     * @param resultDetails A message giving details of status operation.
      * @param jobId To identify the job. Useful if you want to measure the
-     *              time between the start and end. 
+     *              time between the <i>start</i> and <i>end</i>. 
      */
-    void rearSoldierFinishesHisJob(long jobId, String soldierName,
+    void aConsumerHasBeenFinishedHisJob(long jobId, String consumerName,
                                    boolean success, BuildingException exception,
-                                   String message);
+                                   String resultDetails);
 
     /**
-     * If <code>newSize / maxSize</code> is near to 100% it means
+     * If <code>newSize / maxSize</code> is near to 100%, it means
      * that the internal buffer is overloaded and a call to
-     * {@link br.fml.eti.machinegun.MachineGun#fire} can block. 
+     * {@link br.fml.eti.machinegun.MachineGun#fire} can block
+     * for a while.
      *
-     * @param newSize Elements in internal buffer to be consumed.
+     * @param newSize Elements into an internal buffer to be consumed.
      * @param maxSize Maximum capacity of the internal buffer.
      */
-    void updateBattalionSize(int newSize, int maxSize);
+    void updatePreBufferCurrentSize(int newSize, int maxSize);
 
     /**
-     * The thread that will consume the internal buffer is ready.
-     * @param soldierName The thread's name.
+     * When a consumer of embedded queue is ready to consume.
+     * @param consumerName A consumer name like "Consumer 3 of 7".
      */
-    void frontLineSoldierIsReady(String soldierName);
+    void consumerIsReady(String consumerName);
 
     /**
-     * When the consumer of embedded queue is ready to consume.
-     * @param soldierName A soldier name like "Rear soldier 2".
+     * It happens when a mission has been finished. All consumers
+     * will die.
+     * 
+     * @param consumerName A consumer name like "Consumer 3 of 7".
      */
-    void rearSoldierIsReady(String soldierName);
+    void consumerHasBeenStopped(String consumerName);
 
     /**
-     * When a "front line soldier" &ndash; i.e., a internal
-     * buffer consumer &ndash; found a element
-     * to consume and will start to put it into the embedded queue.
+     * Happens when something went wrong in a data conversion (serialization
+     * or deserialization).
      *
-     * @param soldierName A soldier name like "Front line soldier 3".
-     * @param jobId To identify the job. Useful if you want to measure the
-     *              time between the start and end.
-     */
-    void frontLineSoldierStartsHisJob(long jobId, String soldierName);
-
-    /**
-     * When a "front line soldier" &ndash; i.e., a internal
-     * buffer consumer &ndash; finished to put the data into the embedded queue.
-     *
-     * @param soldierName A soldier name like "Front line soldier 3".
-     * @param jobId To identify the job. Useful if you want to measure the
-     *              time between the start and end. 
-     */
-    void frontLineSoldierFinishesHisJob(long jobId, String soldierName);
-
-    /**
-     * It happens when a mission finished.
-     * @param soldierName The thread's name.
-     */
-    void frontLineSoldierDied(String soldierName);
-
-    /**
-     * It happens when a mission finished.
-     * @param soldierName The thread's name.
-     */
-    void rearSoldierDied(String soldierName);
-
-    /**
-     * Happens when something went wrong in data conversion.
      * @see br.fml.eti.machinegun.Capsule
      * @see br.fml.eti.machinegun.WrongCapsuleException
      * @param e Exception
      */
-    void errorOnBulletCapsule(WrongCapsuleException e);
+    void errorOnDataSerialization(WrongCapsuleException e);
 }

@@ -4,63 +4,51 @@ import br.fml.eti.behavior.BuildingException;
 import br.fml.eti.machinegun.WrongCapsuleException;
 
 /**
- * A {@link NegligentAuditor} do nothing. Use it if you think the
+ * <p>A {@link NegligentAuditor} do nothing. Use it if you think the
  * monitor time is taking too much unnecessary time.
+ * </p>
+ * <pre>
+     ___
+    /_\   z z Z z Z Z Z z z
+   <*,*>
+   [`-']
+   -"-"-
+ </pre>
  *
  * @author Felipe Micaroni Lalli (micaroni@gmail.com)
  *         Nov 15, 2010 4:27:30 PM
  */
 public class NegligentAuditor implements ArmyAudit {
     @Override
-    public void rearSoldierStartsHisJob(long jobId, String soldierName) {
+    public void aConsumerStartsHisJob(long jobId, String consumerName) {
 
     }
 
     @Override
-    public void rearSoldierFinishesHisJob(long jobId, String soldierName,
+    public void aConsumerHasBeenFinishedHisJob(long jobId, String consumerName,
                                           boolean success,
                                           BuildingException exception,
-                                          String message) {
+                                          String resultDetails) {
 
     }
 
     @Override
-    public void updateBattalionSize(int newSize, int maxSize) {
+    public void updatePreBufferCurrentSize(int newSize, int maxSize) {
 
     }
 
     @Override
-    public void frontLineSoldierIsReady(String soldierName) {
+    public void consumerIsReady(String consumerName) {
 
     }
 
     @Override
-    public void rearSoldierIsReady(String soldierName) {
-
-    }
-
-    @Override
-    public void frontLineSoldierStartsHisJob(long jobId, String soldierName) {
-
-    }
-
-    @Override
-    public void frontLineSoldierFinishesHisJob(long jobId, String soldierName) {
-
-    }
-
-    @Override
-    public void frontLineSoldierDied(String soldierName) {
-
-    }
-
-    @Override
-    public void rearSoldierDied(String soldierName) {
+    public void consumerHasBeenStopped(String consumerName) {
        
     }
 
     @Override
-    public void errorOnBulletCapsule(WrongCapsuleException e) {
+    public void errorOnDataSerialization(WrongCapsuleException e) {
         
     }
 }

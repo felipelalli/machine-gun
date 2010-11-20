@@ -1,11 +1,21 @@
-The main idea of the /machine-gun/ project is to avoid stopping
-the main flow when expensive things is needed, like I/O operations.
+The  main  idea  of the /machine-gun/ project is soften a serial data processing
+through  persisted  embedded  queues,  specially  if  this  processing take some
+time that the main execution flow cannot wait for.
 
-First, /machine-gun/ will put everything in an (limited) internal buffer,
-after some consumers will put it in an internal persisted queue to
-finally, others consumers do the expensive operation.
+It  is  useful,  e.g.,  if  you  have to persist *a lot of* new data into a slow
+database.    You  don't  want  to  block  your  whole  main  flow  to  wait this
+turtle.   And  you  cannot  just  start  a  thread  to do this, because: 1. your
+RAM  memory  will  get  full  quickly.  2.  if  your  PC  lost the power or your
+system  go  down  for  any  weird  reason,   you  are  in  trouble.  So, let put
+the  logical  processing  into a  persisted  queue  and  process  i t as soon as
+possible, making everything softer.
 
-Everything can be externally monitored through an army audit.
+First,  a /machine-gun/  will  put  everything  in an (limited) internal buffer.
+After,   some  consumers  will  put  it  in  an  internal  persisted   queue  to
+finally, others consumers to execute the expensive operation.
+
+Everything (like current operation and time slices) can be externally
+monitored through an interface called "army audit".
 
       .
       ,,                        __,--.
@@ -20,7 +30,12 @@ Everything can be externally monitored through an army audit.
                                  '----'        \,####\
                                                 \,####)
                                                  \_,-"
-                                                                               
+
+                    MAKE FAST SERIAL PROCESSING
+
+CC-by Felipe Micaroni Lalli <micaroni@gmail.com>
+Special thanks to Igor Hjelmstrom Vinhas Ribeiro <igorhvr@iasylum.net>
+
 == Requirements ==
 * Java 1.6 or better
 * ant 1.8 or better

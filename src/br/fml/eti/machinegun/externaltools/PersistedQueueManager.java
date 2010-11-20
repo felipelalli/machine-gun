@@ -9,7 +9,7 @@ import br.fml.eti.machinegun.auditorship.ArmyAudit;
  * @author Felipe Micaroni Lalli (micaroni@gmail.com)
  *         Nov 15, 2010 4:08:50 PM
  */
-public interface QueueManager {
+public interface PersistedQueueManager {
     /**
      * Put data into a queue. Retry options, logs and exceptions handling
      * must be done externally by the specific implementation because it
