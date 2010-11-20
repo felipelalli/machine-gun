@@ -12,8 +12,8 @@ public class MachineGunTest {
 
         army.startNewMission("default mission",
                 "default queue", new ProcessIntegerSlowly(),
-                new CapsuleInteger(), Army.DEFAULT_BATTALION_SIZE,
-                Army.SMART_NUMBER_OF_SOLDIERS, Army.SMART_NUMBER_OF_SOLDIERS);
+                new CapsuleInteger(), Army.DEFAULT_VOLATILE_BUFFER_SIZE,
+                Army.SMART_NUMBER_OF_CONSUMERS, Army.SMART_NUMBER_OF_CONSUMERS);
 
         MachineGun<Integer> machineGun = army.getANewMachineGun();
 

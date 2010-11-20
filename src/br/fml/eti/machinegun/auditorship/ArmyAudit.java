@@ -6,7 +6,7 @@ import br.fml.eti.machinegun.WrongCapsuleException;
 /**
  * <p>
  * Almost everything that happens in {@link br.fml.eti.machinegun.Army}
- * is reported here, don't worry. Some things will not be reported due
+ * is reported here, don't worry. Irrelevant things will not be reported due
  * these things are internal implementations with constant time, as the
  * internal buffer consumers, e.g.
  * </p>

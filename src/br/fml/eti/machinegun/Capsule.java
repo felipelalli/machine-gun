@@ -12,6 +12,7 @@ package br.fml.eti.machinegun;
  * a <code>T</code> type again.
  * </p>
  *
+ * @see br.fml.eti.machinegun.util.GenericImplementationOfCapsuleForLazyPeople 
  * @author Felipe Micaroni Lalli (micaroni@gmail.com)
  *         Nov 15, 2010 6:51:35 AM
  */

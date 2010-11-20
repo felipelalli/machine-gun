@@ -8,13 +8,27 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * <p>Produces {@link MachineGun machine guns}. Also, organize the thread consumers
- * to let the bullet (data) reach the specified target. 
+ * <p>Produces {@link MachineGun machine guns}. Also,
+ * organize the thread consumers
+ * to let the bullet (data) reach the specified {@link Target target}.
  * Bullets are data, and bullets are from a specific type.
  * A <i>machine gun</i> is a way to make this processing <u>very fast</u>,
  * asynchronously.</p>
- * <p>Before of take a new machine gun, don't forget to
+ * <p>Before {@link #getANewMachineGun() to take a new machine gun},
+ * don't forget to
  * {@link #startNewMission start a mission}.</p>
+ * <pre>
+   [ O ]
+     \ \      p
+      \ \  \o/
+       \ \--'---_
+       /\ \   / ~~\_
+ ./---/__|=/_/------//~~~\
+/___________________/O   O \
+(===(\_________(===(Oo o o O)          W<
+ \~~~\____/     \---\Oo__o--
+   ~~~~~~~       ~~~~~~~~~~
+ </pre>
  *
  * @author Felipe Micaroni Lalli (micaroni@gmail.com)
  *         Nov 15, 2010 6:15:37 AM
@@ -25,26 +39,30 @@ public class Army extends Factory<MachineGun> {
     private ImportedWeapons importedWeapons;
 
     /**
-     * The default is {@value}. Battalion size is the internal
-     * buffer size.
+     * The default is {@value}. Use 1 if you can't lost any data. Use
+     * big values if you have a lot of RAM memory and you don't care
+     * so much if you lost something on system crashes.
      */
-    public static final int DEFAULT_BATTALION_SIZE = 1024;
+    public static final int DEFAULT_VOLATILE_BUFFER_SIZE = 1024;
 
     /**
      * It will use {@link Runtime#availableProcessors()}<code> * 2</code>
-     * for <code>frontLineNumberOfSoldiers</code> and
+     * for number of the internal buffer consumers and
      * {@link Runtime#availableProcessors()}<code> * 5</code>
-     * for <code>rearNumberOfSoldiers</code>. The soldiers are the
-     * threads to consume the volume of data.
+     * for the persisted queue consumers.
      */
-    public static final int SMART_NUMBER_OF_SOLDIERS = 0;
+    public static final int SMART_NUMBER_OF_CONSUMERS = 0;
 
     /**
      * Create a new Army. See {@link #startNewMission} to have some fun.
      * 
      * @param armyAudit If you want to take control of your Army. See
-     *                  {@link br.fml.eti.machinegun.auditorship.NegligentAuditor} if you don't need of
-     *                  auditorship. This parameter don't accept <code>null</code>.
+     *                  {@link br.fml.eti.machinegun.auditorship.NegligentAuditor}
+     *                  if you don't need of an
+     *                  auditorship. This parameter don't
+     *                  accept <code>null</code>.
+     *
+     * @throws NullPointerException if some parameters are <code>null</code>.
      *
      * @param importedWeapons Specific implementations.
      */
@@ -61,67 +79,72 @@ public class Army extends Factory<MachineGun> {
     }
 
     /**
-     * Associates a {@link Mission} with a {@link DirtyWork dirty work}
+     * This function will create and start a {@link Mission mission}
+     * asynchronously.
+     * 
+     * This associates a {@link Mission} with a {@link DirtyWork dirty work}
      * {@link Factory factory}. You have to use different queues to each
-     * dirty work factory; in other words: each queue will transport only
-     * the same kind of data. This function will create
+     * kind of work; in other words: each queue will transport only
+     * ONE kind of data.
      *
-     * @param missionName The mission name. Can be the same of queueName.
+     * @param missionName An arbitrary mission name. Can be the same of queueName.
      * @param queueName The queue name where the "bullets" (data) from
      *                  the {@link MachineGun machine guns} will be transported
      *                  to the final {@link Target target}. If you are using
      *                  a JMS based queue, it is the
-     *                  <code>javax.jms.Queue#getQueueName()</code>.
+     *                  <code>javax.jms.Queue#getQueueName()</code>. Remember
+     *                  that this name is not an arbitrary name, you have to
+     *                  configure it in some place of your
+     *                  {@link br.fml.eti.machinegun.externaltools.PersistedQueueManager}
+     *                  specific implementation.
      *
-     * @param dirtyWorkFactory the associated factory of dirties tasks. When the
+     * @param dirtyWorkFactory the associated factory of dirty works. When the
      *                         "bullet" (data) reaches the target, the
      *                         {@link DirtyWork dirty work} will be executed
-     *                         on the data.
+     *                         using the data as parameter.
      *
      * @param capsule A {@link Capsule} is a way to keep the
      *                "bullet" (data) intact through the way to
-     *                the target. It can convert data to a byte array and
-     *                vice-versa.
+     *                the target. It have to be able to convert a data
+     *                to a byte array and vice-versa. If you are really lazy,
+     *                see {@link br.fml.eti.machinegun.util.GenericImplementationOfCapsuleForLazyPeople}.
      *
-     * @param battalionSize It is the <b>internal buffer size</b>.
+     * @param volatileBufferSize It is the <b>internal buffer size</b>.
      *                      If the buffer is full, the {@link MachineGun#fire}
      *                      function will be blocked until the consumers
-     *                      can drain the volume. You can use
-     *                      {@link #DEFAULT_BATTALION_SIZE}. Set
+     *                      could drain the volume. You can use
+     *                      {@link #DEFAULT_VOLATILE_BUFFER_SIZE}. Set
      *                      high values if you have high available memory
      *                      and don't care so much about lost some data.
      *                      <i>Remember that what is on the buffer will not be
      *                      persisted. If is important to persist EVERYTHING,
-     *                      set this parameter to <b>1</b></i>.
+     *                      set this parameter to <big><b>1</b></big></i>.
      *
-     * @param frontLineNumberOfSoldiers The number of thread consumers to read from
-     *                                   internal buffer and put on internal
-     *                                   queue. Use {@link #SMART_NUMBER_OF_SOLDIERS}
+     * @param numberOfBufferConsumers The number of thread consumers to read from
+     *                                   internal buffer and put on the persisted
+     *                                   queue. Use {@link #SMART_NUMBER_OF_CONSUMERS}
      *                                   to make the MachineGun calculates based
      *                                   on your {@link Runtime#availableProcessors()
      *                                   available processors}.
      *
-     * @param rearNumberOfSoldiers The number of embedded queue thread consumers.
-     *                              This consumers will do the dirty and hard workOnIt.
-     *                              Use {@link #SMART_NUMBER_OF_SOLDIERS}
-     *                              to make the MachineGun calculates based
+     * @param numberOfPersistedQueueConsumers The number of embedded queue thread consumers.
+     *                              This consumers will do the dirty and hard work.
+     *                              Use {@link #SMART_NUMBER_OF_CONSUMERS}
+     *                              to make it calculates based
      *                              on your {@link Runtime#availableProcessors()
      *                              available processors}.
      */
     public <T> void startNewMission(String missionName, String queueName,
-                               Factory<DirtyWork<T>> dirtyWorkFactory,
-                               Capsule<T> capsule,
-                               int battalionSize,
-                               int frontLineNumberOfSoldiers,
-                               int rearNumberOfSoldiers) {
+            Factory<DirtyWork<T>> dirtyWorkFactory,
+            Capsule<T> capsule, int volatileBufferSize,
+            int numberOfBufferConsumers, int numberOfPersistedQueueConsumers) {
 
         Target<T> target = new Target<T>(queueName, dirtyWorkFactory);
         Mission<T> mission = new Mission<T>(armyAudit, importedWeapons,
-                target, capsule, battalionSize,
-                frontLineNumberOfSoldiers, rearNumberOfSoldiers);
+                target, capsule, volatileBufferSize,
+                numberOfBufferConsumers, numberOfPersistedQueueConsumers);
 
         this.missions.put(missionName, mission);
-
         mission.startTheMission();
     }
 
@@ -143,16 +166,18 @@ public class Army extends Factory<MachineGun> {
         }
     }
 
-    @Override
     /**
+     * Just to keep the factory contract, use {@link #getANewMachineGun()}.
+     * 
      * @see #getANewMachineGun()
      */
+    @Override
     public MachineGun buildANewInstance() {
         return this.getANewMachineGun();
     }
 
     /**
-     * Produces a shiny new machine gun.
+     * Produces a shiny and new machine gun.
      * 
      * @return a new machine gun to be used immediately.
      */
@@ -165,13 +190,13 @@ public class Army extends Factory<MachineGun> {
                 @SuppressWarnings(value = "unchecked")
                 Mission<T> mission = missions.get(missionName);
 
-                if (mission == null) {
+                if (mission != null) {
+                    mission.fire(bullet);
+                } else {
                     throw new UnregisteredMissionException("The mission '"
                             + missionName
                             + "' was not registered yet! See 'startNewMission(...)'"
                             + " function.");
-                } else {
-                    mission.fire(bullet);
                 }
             }
         };

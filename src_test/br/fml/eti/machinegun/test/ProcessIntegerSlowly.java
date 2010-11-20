@@ -16,7 +16,7 @@ public class ProcessIntegerSlowly extends Factory<DirtyWork<Integer>> {
 
     private DirtyWork<Integer> dirtyWork = new DirtyWork<Integer>() {
         @Override
-        public void workOnIt(long jobId, String soldierName,
+        public void workOnIt(long jobId, String consumerName,
                              ArmyAudit audit, Integer dataToBeProcessed) {
 
             Integer time = random.nextInt(2);
@@ -30,7 +30,7 @@ public class ProcessIntegerSlowly extends Factory<DirtyWork<Integer>> {
             }
 
             System.out.println("*** " + dataToBeProcessed + " was processed!!");
-            audit.aConsumerHasBeenFinishedHisJob(jobId, soldierName, true, null, "OK!");
+            audit.aConsumerHasBeenFinishedHisJob(jobId, consumerName, true, null, "OK!");
         }
     };
 
