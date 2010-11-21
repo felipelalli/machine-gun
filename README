@@ -1,3 +1,5 @@
+https://github.com/felipelalli/machine-gun/wiki
+
 The  main  idea  of the /machine-gun/ project is soften a serial data processing
 through  persisted  embedded  queues,  specially  if  this  processing take some
 time that the main execution flow cannot wait for.
