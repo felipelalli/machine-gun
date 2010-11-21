@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2010.
+ * CC-by Felipe Micaroni Lalli
+ */
+
 package br.fml.eti.machinegun.test;
 
 import br.fml.eti.machinegun.auditorship.ArmyAudit;
@@ -29,7 +34,7 @@ public class VolatileQueueManager implements PersistedQueueManager {
                                     String queueName, byte[] data)
             throws InterruptedException {
 
-        long timeToWait = random.nextInt(100000);
+        long timeToWait = random.nextInt(10000) + 100;
         while (timeToWait > 0) { // HARD USE PROCESSOR SIMULATION
             timeToWait--;
         }
@@ -64,7 +69,7 @@ public class VolatileQueueManager implements PersistedQueueManager {
                             consumer.consume(data);
                         }
                     } catch (InterruptedException e) {
-
+                        e.printStackTrace();
                     }
                 }
 
@@ -78,9 +83,7 @@ public class VolatileQueueManager implements PersistedQueueManager {
 
     @Override
     public void killAllConsumers(String queueName) throws InterruptedException {
-        for (Thread t : threads) {
-            end = true;
-        }
+        end = true;
 
         for (Thread t : threads) {
             t.join();

@@ -1,5 +1,10 @@
 <?xml version="1.0"?>
 
+<!--
+  ~ Copyright (c) 2010.
+  ~ CC-by Felipe Micaroni Lalli
+  -->
+
 <project name="machine-gun" default="help" basedir=".">
     <description>
             Machine Gun Project

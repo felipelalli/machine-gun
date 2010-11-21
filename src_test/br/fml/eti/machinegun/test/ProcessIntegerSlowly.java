@@ -1,7 +1,10 @@
+/*
+ * Copyright (c) 2010.
+ * CC-by Felipe Micaroni Lalli
+ */
+
 package br.fml.eti.machinegun.test;
 
-import br.fml.eti.behavior.BuildingException;
-import br.fml.eti.behavior.Factory;
 import br.fml.eti.machinegun.DirtyWork;
 import br.fml.eti.machinegun.auditorship.ArmyAudit;
 
@@ -29,6 +32,8 @@ public class ProcessIntegerSlowly implements DirtyWork<Integer> {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        MachineGunTest.processed(dataToBeProcessed);
 
         System.out.println("*** " + dataToBeProcessed + " was processed!!");
         audit.aConsumerHasBeenFinishedHisJob(jobId, consumerName, true, null, "OK!");

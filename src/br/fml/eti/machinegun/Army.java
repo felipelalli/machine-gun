@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2010.
+ * CC-by Felipe Micaroni Lalli
+ */
+
 package br.fml.eti.machinegun;
 
 import br.fml.eti.behavior.Factory;
