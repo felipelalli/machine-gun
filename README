@@ -7,7 +7,7 @@ database.    You  don't  want  to  block  your  whole  main  flow  to  wait this
 turtle.   And  you  cannot  just  start  a  thread  to do this, because: 1. your
 RAM  memory  will  get  full  quickly.  2.  if  your  PC  lost the power or your
 system  go  down  for  any  weird  reason,   you  are  in  trouble.  So, let put
-the  logical  processing  into a  persisted  queue  and  process  i t as soon as
+the  logical  processing  into a  persisted  queue  and  process  it  as soon as
 possible, making everything softer.
 
 First,  a /machine-gun/  will  put  everything  in an (limited) internal buffer.
