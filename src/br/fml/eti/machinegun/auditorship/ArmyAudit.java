@@ -10,6 +10,9 @@ import br.fml.eti.machinegun.WrongCapsuleException;
  * these things are internal implementations with constant time, as the
  * internal buffer consumers, e.g.
  * </p>
+ * <p>
+ * It is useful if you need to log and/or measure the time of the main operations.
+ * </p>
  * <pre>
  *               ,
      __  _.-"` `'-.
@@ -63,10 +66,10 @@ public interface ArmyAudit {
      * @param newSize Elements into an internal buffer to be consumed.
      * @param maxSize Maximum capacity of the internal buffer.
      */
-    void updatePreBufferCurrentSize(int newSize, int maxSize);
+    void updateCurrentBufferSize(int newSize, int maxSize);
 
     /**
-     * When a consumer of embedded queue is ready to consume.
+     * When a consumer of the persisted embedded queue is ready to consume.
      * @param consumerName A consumer name like "Consumer 3 of 7".
      */
     void consumerIsReady(String consumerName);
@@ -90,16 +93,16 @@ public interface ArmyAudit {
     void errorOnDataSerialization(WrongCapsuleException e);
 
     /**
-     * Is called if something went wrong on
+     * It is called if something went wrong on
      * {@link br.fml.eti.machinegun.externaltools.PersistedQueueManager#putIntoAnEmbeddedQueue}.
-     * @param e The cause
+     * @param e The root of the problem
      */
     void errorWhenPuttingIntoAnEmbeddedQueue(Exception e);
 
     /**
-     * Is called if something went wrong on
-     * {@link br.fml.eti.machinegun.externaltools.PersistedQueueManager#putIntoAnEmbeddedQueue}.
+     * It ss called if something went wrong on
+     * {@link br.fml.eti.machinegun.externaltools.PersistedQueueManager#registerANewConsumerInAnEmbeddedQueue}.
      * @param e The cause
-     */    
+     */
     void errorWhenRegisteringANewConsumerInAnEmbeddedQueue(Exception e);
 }

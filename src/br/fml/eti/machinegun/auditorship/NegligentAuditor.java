@@ -33,7 +33,7 @@ public class NegligentAuditor implements ArmyAudit {
     }
 
     @Override
-    public void updatePreBufferCurrentSize(int newSize, int maxSize) {
+    public void updateCurrentBufferSize(int newSize, int maxSize) {
 
     }
 

@@ -21,7 +21,7 @@ public class SystemOutAudit implements ArmyAudit {
     }
 
     @Override
-    public void updatePreBufferCurrentSize(int newSize, int maxSize) {
+    public void updateCurrentBufferSize(int newSize, int maxSize) {
         System.out.println(newSize + " of " + maxSize + ": "
                 + (newSize * 100 / maxSize) + "%");
     }

@@ -39,21 +39,6 @@ public class Army extends Factory<MachineGun> {
     private ImportedWeapons importedWeapons;
 
     /**
-     * The default is {@value}. Use 1 if you can't lost any data. Use
-     * big values if you have a lot of RAM memory and you don't care
-     * so much if you lost something on system crashes.
-     */
-    public static final int DEFAULT_VOLATILE_BUFFER_SIZE = 1024;
-
-    /**
-     * It will use {@link Runtime#availableProcessors()}<code> * 2</code>
-     * for number of the internal buffer consumers and
-     * {@link Runtime#availableProcessors()}<code> * 5</code>
-     * for the persisted queue consumers.
-     */
-    public static final int SMART_NUMBER_OF_CONSUMERS = 0;
-
-    /**
      * Create a new Army. See {@link #startNewMission} to have some fun.
      * 
      * @param armyAudit If you want to take control of your Army. See
@@ -107,13 +92,13 @@ public class Army extends Factory<MachineGun> {
      *                "bullet" (data) intact through the way to
      *                the target. It have to be able to convert a data
      *                to a byte array and vice-versa. If you are really lazy,
-     *                see {@link br.fml.eti.machinegun.util.CapsuleGenericImplForLazyPeople}.
+     *                see {@link br.fml.eti.machinegun.util.GenericCapsuleForLazyPeople}.
      *
      * @param volatileBufferSize It is the <b>internal buffer size</b>.
      *                      If the buffer is full, the {@link MachineGun#fire}
      *                      function will be blocked until the consumers
      *                      could drain the volume. You can use
-     *                      {@link #DEFAULT_VOLATILE_BUFFER_SIZE}. Set
+     *                      {@link Mission#DEFAULT_VOLATILE_BUFFER_SIZE}. Set
      *                      high values if you have high available memory
      *                      and don't care so much about lost some data.
      *                      <i>Remember that what is on the buffer will not be
@@ -122,15 +107,15 @@ public class Army extends Factory<MachineGun> {
      *
      * @param numberOfBufferConsumers The number of thread consumers to read from
      *                                   internal buffer and put on the persisted
-     *                                   queue. Use {@link #SMART_NUMBER_OF_CONSUMERS}
-     *                                   to make the MachineGun calculates based
+     *                                   queue. Use {@link Mission#SMART_NUMBER_OF_CONSUMERS}
+     *                                   to make the function calculates based
      *                                   on your {@link Runtime#availableProcessors()
      *                                   available processors}.
      *
      * @param numberOfPersistedQueueConsumers The number of embedded queue thread consumers.
      *                              This consumers will do the dirty and hard work.
-     *                              Use {@link #SMART_NUMBER_OF_CONSUMERS}
-     *                              to make it calculates based
+     *                              Use {@link Mission#SMART_NUMBER_OF_CONSUMERS}
+     *                              to make the function calculates based
      *                              on your {@link Runtime#availableProcessors()
      *                              available processors}.
      */
@@ -146,6 +131,23 @@ public class Army extends Factory<MachineGun> {
 
         this.missions.put(missionName, mission);
         mission.startTheMission();
+    }
+
+    /**
+     * Call {@link #startNewMission} using default values to
+     * <code>volatileBufferSize</code>, <code>numberOfBufferConsumers</code>
+     * and <code>numberOfPersistedQueueConsumers</code>.
+     * 
+     * @see #startNewMission
+     */
+    public <T> void startNewMission(String missionName, String queueName,
+            Factory<DirtyWork<T>> dirtyWorkFactory,
+            Capsule<T> capsule) {
+
+        startNewMission(missionName, queueName, dirtyWorkFactory,
+                capsule, Mission.DEFAULT_VOLATILE_BUFFER_SIZE,
+                Mission.SMART_NUMBER_OF_CONSUMERS,
+                Mission.SMART_NUMBER_OF_CONSUMERS);
     }
 
     /**

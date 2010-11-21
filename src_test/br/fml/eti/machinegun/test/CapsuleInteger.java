@@ -5,7 +5,7 @@ import br.fml.eti.machinegun.WrongCapsuleException;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 /**
- *
+ * An example of {@link br.fml.eti.machinegun.Capsule} using Google Protobuf. 
  * @author Felipe Micaroni Lalli (micaroni@gmail.com)
  *         Nov 15, 2010 7:00:47 PM
  */

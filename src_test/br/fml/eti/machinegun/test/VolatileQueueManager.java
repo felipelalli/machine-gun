@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
  * @author Felipe Micaroni Lalli (micaroni@gmail.com)
  *         Nov 15, 2010 6:19:53 PM
  */
-public class FakeQueueManager implements PersistedQueueManager {
+public class VolatileQueueManager implements PersistedQueueManager {
     private Map<String, BlockingQueue<byte[]>> queues
             = new HashMap<String,  BlockingQueue<byte[]>>();
 
@@ -30,7 +30,7 @@ public class FakeQueueManager implements PersistedQueueManager {
             throws InterruptedException {
 
         long timeToWait = random.nextInt(100000);
-        while (timeToWait > 0) { // HARD USE PROCESSOR
+        while (timeToWait > 0) { // HARD USE PROCESSOR SIMULATION
             timeToWait--;
         }
 
@@ -54,7 +54,7 @@ public class FakeQueueManager implements PersistedQueueManager {
 
         size++;
 
-        Thread t = new Thread("mock consumer " + size + " of " + size) {
+        Thread t = new Thread("consumer " + size + " of " + size) {
             public void run() {
                 while (!end || getQueue(queueName).size() > 0) {
                     try {

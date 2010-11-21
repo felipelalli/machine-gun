@@ -4,6 +4,7 @@ import br.fml.eti.behavior.BuildingException;
 import br.fml.eti.machinegun.auditorship.ArmyAudit;
 import br.fml.eti.machinegun.externaltools.Consumer;
 import br.fml.eti.machinegun.externaltools.ImportedWeapons;
+import br.fml.eti.machinegun.externaltools.PersistedQueueManager;
 
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
@@ -12,23 +13,25 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
+ * To start a new mission, see {@link br.fml.eti.machinegun.Army#startNewMission}.
+ * </p>
+ * <p>
  * A {@link Mission} knows his {@link Target} and keep
  * working with some thread consumers to make the "bullet" (data)
- * reach your specified destination. A captain of a {@link Mission}
- * is good only with a kind of bullet, because that you can say the
+ * reach its specified destination. A captain of a {@link Mission}
+ * is good only with a kind of bullet, because it you can say the
  * mission "is of a specific type".
  * </p>
  * <p>
  * In a less abstract, a {@link Mission} is a group of {@link Thread threads}
  * consuming the <i>first internal buffer</i> to put the bullets
- * (data) into a persisted embedded queue. Also, there are other {@link Thread threads}
- * consuming from this queue to execute the
+ * (data) into a persisted embedded queue. Also, there are
+ * other {@link Thread threads} consuming from this queue to execute the
  * {@link DirtyWork dirty work} associated with the kind of bullet (data).
  * </p>
  * <p>
- * A Mission will wait (doing nothing) until
- * the method {@link #startTheMission()} is called; so, don't forget
- * to call it!
+ * A Mission will wait (idle) until
+ * the method {@link #startTheMission()} is called.
  * </p>
  * <pre>
   _
@@ -60,7 +63,7 @@ import java.util.concurrent.TimeUnit;
 public class Mission<BulletType> {
     // monitoring and external tools
     private ArmyAudit armyAudit;
-    private ImportedWeapons importedWeapons;
+    private PersistedQueueManager persistedQueueManager;
 
     // target
     private Target<BulletType> target;
@@ -75,6 +78,21 @@ public class Mission<BulletType> {
     // aux
     private Random random = new Random();
     private boolean end = false;
+
+    /**
+     * The default is {@value}. Use 1 if you can't lost any data. Use
+     * big values if you have a lot of RAM memory and you don't care
+     * so much if you lost something on system crashes.
+     */
+    public static final int DEFAULT_VOLATILE_BUFFER_SIZE = 1024;
+
+    /**
+     * It will use {@link Runtime#availableProcessors()}
+     * for number of the internal buffer consumers and
+     * {@link Runtime#availableProcessors()}<code> * 5</code>
+     * for the persisted queue consumers.
+     */
+    public static final int SMART_NUMBER_OF_CONSUMERS = 0;    
 
     /**
      * See the {@link Army#startNewMission} documentation.
@@ -98,7 +116,7 @@ public class Mission<BulletType> {
 
         if (numberOfBufferConsumers < 1) {
             numberOfBufferConsumers
-                    = Runtime.getRuntime().availableProcessors() * 2;
+                    = Runtime.getRuntime().availableProcessors();
 
             if (numberOfBufferConsumers < 1) {
                  numberOfBufferConsumers = 1;
@@ -117,7 +135,7 @@ public class Mission<BulletType> {
         this.target = target;
         this.capsule = capsule;
         this.armyAudit = armyAudit;
-        this.importedWeapons = importedWeapons;
+        this.persistedQueueManager = importedWeapons.getQueueManager();
 
         this.volatileBufferSize = volatileBufferSize;
         this.buffer = new LinkedBlockingQueue<byte[]>(volatileBufferSize);
@@ -143,7 +161,7 @@ public class Mission<BulletType> {
                 this.buffer.put(data);
             }
 
-            armyAudit.updatePreBufferCurrentSize(buffer.size(), volatileBufferSize);
+            armyAudit.updateCurrentBufferSize(buffer.size(), volatileBufferSize);
         } catch (WrongCapsuleException e) {
             armyAudit.errorOnDataSerialization(e);
         }
@@ -222,12 +240,12 @@ public class Mission<BulletType> {
     private void internalBufferConsumerDoWork(byte[] data)
             throws InterruptedException {
 
-        armyAudit.updatePreBufferCurrentSize(buffer.size(), volatileBufferSize);
-        putInAEmbeddedQueue(target.getQueueName(), data);
+        armyAudit.updateCurrentBufferSize(buffer.size(), volatileBufferSize);
+        putDataIntoAnEmbeddedQueue(target.getQueueName(), data);
     }
 
     /**
-     * Kill all consumers (buffers and persisted queue).
+     * Kill all consumers (first of buffers and after persisted queue).
      * @throws InterruptedException Because it waits the threads die.
      */
     public void stopTheMission() throws InterruptedException {
@@ -240,22 +258,20 @@ public class Mission<BulletType> {
                 }
             }
 
-            importedWeapons.getQueueManager().killAllConsumers(
-                    target.getQueueName());
+            persistedQueueManager.killAllConsumers(target.getQueueName());
         }
     }
 
-    private void putInAEmbeddedQueue(String queueName, byte[] data)
+    private void putDataIntoAnEmbeddedQueue(String queueName, byte[] data)
             throws InterruptedException {
         
-        importedWeapons.getQueueManager()
-                .putIntoAnEmbeddedQueue(armyAudit, queueName, data);
+        persistedQueueManager.putIntoAnEmbeddedQueue(armyAudit, queueName, data);
     }
 
     private void registerAConsumerInEmbeddedQueue(
             String queueName, Consumer consumer) {
 
-        importedWeapons.getQueueManager()
-                .registerANewConsumerInAnEmbeddedQueue(armyAudit, queueName, consumer);
+        persistedQueueManager.registerANewConsumerInAnEmbeddedQueue(
+                armyAudit, queueName, consumer);
     }    
 }
