@@ -12,6 +12,7 @@ import br.fml.eti.machinegun.Capsule;
 import br.fml.eti.machinegun.DirtyWork;
 import br.fml.eti.machinegun.MachineGun;
 import br.fml.eti.machinegun.auditorship.ArmyAudit;
+import br.fml.eti.machinegun.auditorship.NegligentAuditor;
 import br.fml.eti.machinegun.externaltools.ImportedWeapons;
 import br.fml.eti.machinegun.externaltools.PersistedQueueManager;
 import org.junit.Assert;
@@ -33,7 +34,7 @@ public class MachineGunTest {
 
     @Test
     public void test() throws Exception {
-        ArmyAudit armyAudit = new SystemOutAudit();
+        ArmyAudit armyAudit = new NegligentAuditor();
         PersistedQueueManager queueManager = new VolatileQueueManager();
         ImportedWeapons importedWeapons = new ImportedWeapons(queueManager);
 
@@ -64,10 +65,6 @@ public class MachineGunTest {
                     for (int j = 0; j < 10000; j++) {
                         try {
                             int n = sequential++;
-                            System.out.println(Thread
-                                    .currentThread().getName()
-                                    + " will produce " + n);
-
                             processed.add(n);
                             machineGun.fire(n, "default mission");
                         } catch (Exception e) {
