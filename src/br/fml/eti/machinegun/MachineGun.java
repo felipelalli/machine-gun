@@ -45,19 +45,13 @@ public abstract class MachineGun<T> {
      * You can use a {@link MachineGun} to "fire" the <code>data</code>
      * as fast as possible into an internal buffer to, after, be placed
      * in an persisted embedded queue to be processed as soon as possible
-     * until finally reach the final {@link Target target}.
+     * until finally reach the final associated {@link Target target}.
      *
-     * @throws UnregisteredMissionException If you forget to start a mission
-     *                                      before using {@link Army#startNewMission}.
      * @throws InterruptedException If the army is busy (the internal buffer is full)
      *                              so this function can block for a while.
      *
      * @param bullet The <b>data</b> to be processed.
      *
-     * @param missionName Where and how the "bullet" (data) will reach the target.
-     *               You <u>have to</u> register a mission in the {@link Army}:
-     *               see the {@link Army#startNewMission} to know how to do this.
      */
-    public abstract void fire(T bullet, String missionName)
-            throws UnregisteredMissionException, InterruptedException;
+    public abstract void fire(T bullet) throws InterruptedException;
 }

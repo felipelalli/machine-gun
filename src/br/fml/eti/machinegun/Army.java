@@ -40,6 +40,7 @@ import java.util.Map;
  */
 public class Army extends Factory<MachineGun> {
     private Map<String, Mission> missions;
+    private String lastUsedMission = "";
     private ArmyAudit armyAudit;
     private ImportedWeapons importedWeapons;
 
@@ -52,7 +53,7 @@ public class Army extends Factory<MachineGun> {
      *                  auditorship. This parameter don't
      *                  accept <code>null</code>.
      *
-     * @throws NullPointerException if some parameters are <code>null</code>.
+     * @throws IllegalArgumentException if some parameters are <code>null</code>.
      *
      * @param importedWeapons Specific implementations.
      */
@@ -60,7 +61,7 @@ public class Army extends Factory<MachineGun> {
         this.missions = new HashMap<String, Mission>();
 
         if (armyAudit == null || importedWeapons == null) {
-            throw new NullPointerException("Internal error: armyAudit and"
+            throw new IllegalArgumentException("Internal error: armyAudit and"
                     + " importedWeapons can't be null!");
         }
 
@@ -136,6 +137,7 @@ public class Army extends Factory<MachineGun> {
 
         this.missions.put(missionName, mission);
         mission.startTheMission();
+        lastUsedMission = missionName;
     }
 
     /**
@@ -184,37 +186,46 @@ public class Army extends Factory<MachineGun> {
     }
 
     /**
-     * Just to keep the factory contract, use {@link #getANewMachineGun()}.
+     * Just to keep the factory contract, use {@link #getANewMachineGun}.
+     * This function will use the last used mission.
      * 
-     * @see #getANewMachineGun()
+     * @see #getANewMachineGun
      */
     @Override
     public MachineGun buildANewInstance() {
-        return this.getANewMachineGun();
+        return this.getANewMachineGun(lastUsedMission);
+    }
+
+    public Mission getAMission(String missionName) {
+        if (!missions.containsKey(missionName)) {
+            throw new UnregisteredMissionException("The mission '"
+                    + missionName
+                    + "' was not registered yet! See 'startNewMission(...)'"
+                    + " function.");
+        }
+
+        return missions.get(missionName);
     }
 
     /**
      * Produces a shiny and new machine gun.
-     * 
+     *
+     * @throws UnregisteredMissionException If you forget to {@link #startNewMission start a mission}
+     *                                      before using this.
+     *
+     * @param missionName the associated mission
      * @return a new machine gun to be used immediately.
      */
-    public <T> MachineGun<T> getANewMachineGun() {
+    public <T> MachineGun<T> getANewMachineGun(final String missionName) throws UnregisteredMissionException {
+        lastUsedMission = missionName;
+
+        @SuppressWarnings("unchecked")
+        final Mission<T> mission = (Mission<T>) getAMission(missionName);
+
         return new MachineGun<T>() {
             @Override
-            public void fire(T bullet, String missionName)
-                    throws UnregisteredMissionException, InterruptedException {
-
-                @SuppressWarnings(value = "unchecked")
-                Mission<T> mission = missions.get(missionName);
-
-                if (mission != null) {
-                    mission.fire(bullet);
-                } else {
-                    throw new UnregisteredMissionException("The mission '"
-                            + missionName
-                            + "' was not registered yet! See 'startNewMission(...)'"
-                            + " function.");
-                }
+            public void fire(T bullet) throws InterruptedException {
+                mission.fire(bullet);
             }
         };
     }
