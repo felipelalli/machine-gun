@@ -19,7 +19,7 @@ import java.util.Map;
  * Bullets are data, and bullets are from a specific type.
  * A <i>machine gun</i> is a way to make this processing <u>very fast</u>,
  * asynchronously.</p>
- * <p>Before {@link #getANewMachineGun() to take a new machine gun},
+ * <p>Before {@link #getANewMachineGun to take a new machine gun},
  * don't forget to
  * {@link #startNewMission start a mission}.</p>
  * <pre>
