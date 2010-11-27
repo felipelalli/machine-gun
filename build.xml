@@ -34,13 +34,6 @@
         <javac srcdir="${src.dir}" destdir="${deploy.dir}" debug="${debug}" includeantruntime="true">
 	        <classpath refid="classpath" />
 	    </javac>
-
-        <!-- Copy HornetQ configuration files to bin folder -->
-        <copy todir="${deploy.dir}">
-            <fileset dir="${src.dir}">
-                <include name="**/*.xml" />
-            </fileset>
-        </copy>
     </target>
 
     <target name="clean" depends="init" description="Delete compiled classes.">
