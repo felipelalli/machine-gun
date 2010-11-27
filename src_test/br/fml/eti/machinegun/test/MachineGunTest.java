@@ -65,13 +65,14 @@ public class MachineGunTest {
 
         Thread[] threads = new Thread[100];
 
+        // get a machine gun to strafe
+        final MachineGun<Integer> machineGun
+                = army.getANewMachineGun("default mission");        
+
         // creates 100 producers
         for (int i = 0; i < threads.length; i++) {
             threads[i] = new Thread("Producer " + i + " of " + threads.length) {
                 public void run() {
-                    // get a machine gun to strafe
-                    MachineGun<Integer> machineGun = army.getANewMachineGun();
-
                     // Produces 10.000 elements
                     for (int j = 0; j < 10000; j++) {
                         try {
@@ -83,7 +84,7 @@ public class MachineGunTest {
                             processed.add(n);
 
                             // strafe
-                            machineGun.fire(n, "default mission");
+                            machineGun.fire(n);
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
