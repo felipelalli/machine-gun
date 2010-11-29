@@ -7,16 +7,17 @@ package br.eti.fml.machinegun.test;
 
 import br.eti.fml.behavior.BuildingException;
 import br.eti.fml.behavior.Factory;
+import br.eti.fml.implementations.KyotoCabinetBasedPersistedQueue;
 import br.eti.fml.machinegun.Army;
 import br.eti.fml.machinegun.Capsule;
 import br.eti.fml.machinegun.DirtyWork;
 import br.eti.fml.machinegun.MachineGun;
 import br.eti.fml.machinegun.auditorship.ArmyAudit;
 import br.eti.fml.machinegun.externaltools.ImportedWeapons;
-import br.eti.fml.machinegun.externaltools.PersistedQueueManager;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -37,7 +38,11 @@ public class MachineGunTest {
         ArmyAudit armyAudit = new SystemOutAudit();
 
         // create a fake "persisted" queue manager. It just use BlockingQueue
-        PersistedQueueManager queueManager = new VolatileQueueManager();
+        //PersistedQueueManager queueManager = new VolatileQueueManager();
+        KyotoCabinetBasedPersistedQueue queueManager
+                = new KyotoCabinetBasedPersistedQueue(new File("kyotodb"),
+                    "default queue");
+
         ImportedWeapons importedWeapons = new ImportedWeapons(queueManager);
 
         // create an Army to make machine guns
@@ -103,6 +108,10 @@ public class MachineGunTest {
 
         // make all consumers die
         army.stopTheMission("default mission");
+
+        while (!queueManager.isEmpty("default queue")) {
+            Thread.sleep(100);
+        }
 
         // everything was well processed?
         Assert.assertTrue(processed.size() == 0);

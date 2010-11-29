@@ -12,6 +12,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import kyotocabinet.DB;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,7 +27,9 @@ public class KyotoCabinetBasedPersistedQueue implements PersistedQueueManager {
     private boolean closed = false;
     private Random random = new Random();
 
-    public KyotoCabinetBasedPersistedQueue(File directory, String ... queues) {
+    public KyotoCabinetBasedPersistedQueue(File directory, String ... queues)
+            throws IOException {
+
         directory.mkdirs();
 
         if (!directory.isDirectory()) {
@@ -34,20 +37,25 @@ public class KyotoCabinetBasedPersistedQueue implements PersistedQueueManager {
         }
 
         for (String queue : queues) {
-            DB db = new DB();
-            this.db.put(queue, db);
+            try {
+                DB db = new DB();
+                this.db.put(queue, db);
 
-            if (!db.open(directory.getAbsolutePath()
-                    + File.separatorChar + "queue-"
-                    + queue.hashCode() + ".kch", DB.OWRITER | DB.OCREATE)) {
+                if (!db.open(directory.getAbsolutePath()
+                        + File.separatorChar + "queue-"
+                        + Integer.toHexString(queue.hashCode()) + ".kch", DB.OWRITER | DB.OCREATE)) {
 
-                throw db.error();
+                    throw db.error();
+                }
+
+                db.tune_encoding("UTF-8");
+
+                db.cas(head(queue), null, longToBytes(0L));
+                db.cas(tail(queue), null, longToBytes(-1L));
+            } catch (UnsatisfiedLinkError e) {
+                throw new IOException("java.library.path=\""
+                        + System.getProperty("java.library.path") + "\"", e);
             }
-
-            db.tune_encoding("UTF-8");
-
-            db.cas(head(queue), null, longToBytes(0L));
-            db.cas(tail(queue), null, longToBytes(-1L));
         }
     }
 
@@ -107,10 +115,12 @@ public class KyotoCabinetBasedPersistedQueue implements PersistedQueueManager {
 
             while (!ok) {
                 long tail = bytesToLong(db.get(tail(queueName)));
-                ok = db.cas(tail(queueName), longToBytes(tail), longToBytes(tail + 1));
+                long newTail = tail + 1L;
+                ok = db.cas(tail(queueName),
+                        longToBytes(tail), longToBytes(newTail));
 
                 if (ok) {
-                    db.set(stringToBytes("addr." + tail), data);
+                    db.set(stringToBytes("addr." + newTail), data);
                 }
             }
 
@@ -151,10 +161,12 @@ public class KyotoCabinetBasedPersistedQueue implements PersistedQueueManager {
                             if (!needProcess) {
                                Thread.sleep(random.nextInt(100) + 10);
                             } else {
-                                byte[] data = db.get(stringToBytes("addr."
-                                        + headToBeProcessed));
+                                byte[] addr = stringToBytes(
+                                        "addr." + headToBeProcessed);
 
+                                byte[] data = db.get(addr);
                                 consumer.consume(data);
+                                db.remove(addr);
                             }
                         }
                     } catch (InterruptedException e) {
