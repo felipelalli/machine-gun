@@ -24,18 +24,18 @@ public class ProcessIntegerSlowly implements DirtyWork<Integer> {
                          ArmyAudit audit, Integer dataToBeProcessed) {
 
         Integer time = random.nextInt(2);
-        System.out.println("*** Will process " + dataToBeProcessed
-                + " for " + time + " millis...");
+        //System.out.println("*** Will process " + dataToBeProcessed
+        //        + " for " + time + " millis...");
 
-        try {
-            Thread.sleep(time);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            Thread.sleep(time);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
 
         MachineGunTest.processed(dataToBeProcessed);
 
-        System.out.println("*** " + dataToBeProcessed + " was processed!!");
+        //System.out.println("*** " + dataToBeProcessed + " was processed!!");
         audit.aConsumerHasBeenFinishedHisJob(jobId, consumerName, true, null, "OK!");
     }
 }

@@ -12,3 +12,6 @@
 out/
 deploy/
 doc/javadoc/
+
+# Runtime generated files
+kyotodb/

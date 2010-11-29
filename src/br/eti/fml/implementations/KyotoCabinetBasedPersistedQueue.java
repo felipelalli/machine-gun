@@ -17,7 +17,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class KyotoCabinetBasedPersistedQueue implements PersistedQueueManager {
@@ -25,7 +24,6 @@ public class KyotoCabinetBasedPersistedQueue implements PersistedQueueManager {
     private ArrayList<Thread> threads = new ArrayList<Thread>();
     private long size = 0;
     private boolean closed = false;
-    private Random random = new Random();
 
     public KyotoCabinetBasedPersistedQueue(File directory, String ... queues)
             throws IOException {
@@ -43,7 +41,8 @@ public class KyotoCabinetBasedPersistedQueue implements PersistedQueueManager {
 
                 if (!db.open(directory.getAbsolutePath()
                         + File.separatorChar + "queue-"
-                        + Integer.toHexString(queue.hashCode()) + ".kch", DB.OWRITER | DB.OCREATE)) {
+                        + Integer.toHexString(queue.hashCode()) + ".kch#"
+                        + "dfunit=204800", DB.OWRITER | DB.OCREATE)) {
 
                     throw db.error();
                 }
@@ -110,7 +109,7 @@ public class KyotoCabinetBasedPersistedQueue implements PersistedQueueManager {
 
         DB db = this.db.get(queueName);
 
-        if (db.begin_transaction(true)) {
+        if (db.begin_transaction(false)) {
             boolean ok = false;
 
             while (!ok) {
@@ -143,7 +142,7 @@ public class KyotoCabinetBasedPersistedQueue implements PersistedQueueManager {
             public void run() {
                 while (!closed) {
                     try {
-                        if (db.begin_transaction(true)) {
+                        if (db.begin_transaction(false)) {
                             long headToBeProcessed = bytesToLong(
                                     db.get(head(queueName)));
 
@@ -159,7 +158,7 @@ public class KyotoCabinetBasedPersistedQueue implements PersistedQueueManager {
                             db.end_transaction(true);
 
                             if (!needProcess) {
-                               Thread.sleep(random.nextInt(100) + 10);
+                               Thread.sleep(100);
                             } else {
                                 byte[] addr = stringToBytes(
                                         "addr." + headToBeProcessed);
@@ -219,6 +218,8 @@ public class KyotoCabinetBasedPersistedQueue implements PersistedQueueManager {
             }
 
             for (DB db : this.db.values()) {
+                db.synchronize(true, null);
+
                 if (!db.close()) {
                     db.error().printStackTrace();
                 }

@@ -13,6 +13,7 @@ import br.eti.fml.machinegun.Capsule;
 import br.eti.fml.machinegun.DirtyWork;
 import br.eti.fml.machinegun.MachineGun;
 import br.eti.fml.machinegun.auditorship.ArmyAudit;
+import br.eti.fml.machinegun.auditorship.NegligentAuditor;
 import br.eti.fml.machinegun.externaltools.ImportedWeapons;
 import org.junit.Assert;
 import org.junit.Test;
@@ -35,7 +36,8 @@ public class MachineGunTest {
     @Test
     public void test() throws Exception {
         // create an ArmyAudit that just show to standard output
-        ArmyAudit armyAudit = new SystemOutAudit();
+        //ArmyAudit armyAudit = new SystemOutAudit();
+        ArmyAudit armyAudit = new NegligentAuditor();
 
         // create a fake "persisted" queue manager. It just use BlockingQueue
         //PersistedQueueManager queueManager = new VolatileQueueManager();
@@ -82,9 +84,9 @@ public class MachineGunTest {
                     for (int j = 0; j < 10000; j++) {
                         try {
                             int n = sequential++;
-                            System.out.println(Thread
-                                    .currentThread().getName()
-                                    + " will produce " + n);
+                            //System.out.println(Thread
+                            //        .currentThread().getName()
+                            //        + " will produce " + n);
 
                             processed.add(n);
 
