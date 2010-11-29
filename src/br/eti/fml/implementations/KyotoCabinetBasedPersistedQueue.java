@@ -45,8 +45,8 @@ public class KyotoCabinetBasedPersistedQueue implements PersistedQueueManager {
 
                 if (!db.open(directory.getAbsolutePath()
                         + File.separatorChar + "queue-"
-                        + Integer.toHexString(queue.hashCode()) + ".kch#"
-                        + "dfunit=204800", DB.OWRITER | DB.OCREATE)) {
+                        + Integer.toHexString(queue.hashCode()) + ".kch",
+                            DB.OWRITER | DB.OCREATE)) {
 
                     throw db.error();
                 }

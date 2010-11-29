@@ -34,11 +34,6 @@ public class VolatileQueueManager implements PersistedQueueManager {
                                     String queueName, byte[] data)
             throws InterruptedException {
 
-        long timeToWait = random.nextInt(10000) + 100;
-        while (timeToWait > 0) { // HARD USE PROCESSOR SIMULATION
-            timeToWait--;
-        }
-
         getQueue(queueName).put(data);
     }
 
