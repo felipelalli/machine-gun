@@ -15,6 +15,7 @@ import br.eti.fml.machinegun.MachineGun;
 import br.eti.fml.machinegun.auditorship.ArmyAudit;
 import br.eti.fml.machinegun.auditorship.NegligentAuditor;
 import br.eti.fml.machinegun.externaltools.ImportedWeapons;
+import br.eti.fml.machinegun.externaltools.PersistedQueueManager;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -34,18 +35,40 @@ public class MachineGunTest {
     }
 
     @Test
-    public void test() throws Exception {
+    public void memory() throws Exception {
+        long before = System.currentTimeMillis();
+
+        // create a fake "persisted" queue manager. It just use BlockingQueue
+        PersistedQueueManager queueManager = new VolatileQueueManager();
+        ImportedWeapons importedWeapons = new ImportedWeapons(queueManager);
+        test(importedWeapons);
+
+        long diff = System.currentTimeMillis() - before;
+        System.out.println("memory test = " + diff + " millis");
+    }
+
+    @Test
+    public void kyoto() throws Exception {
+        long before = System.currentTimeMillis();
+
+        KyotoCabinetBasedPersistedQueue queueManager
+                = new KyotoCabinetBasedPersistedQueue(
+                        new File("kyotodb"), 10240, "default queue");
+
+        ImportedWeapons importedWeapons = new ImportedWeapons(queueManager);
+        test(importedWeapons);
+
+        long diff = System.currentTimeMillis() - before;
+        System.out.println("kyoto test = " + diff + " millis");        
+    }
+
+
+    public void test(ImportedWeapons importedWeapons) throws Exception {
+        PersistedQueueManager queueManager = importedWeapons.getQueueManager();
+
         // create an ArmyAudit that just show to standard output
         //ArmyAudit armyAudit = new SystemOutAudit();
         ArmyAudit armyAudit = new NegligentAuditor();
-
-        // create a fake "persisted" queue manager. It just use BlockingQueue
-        //PersistedQueueManager queueManager = new VolatileQueueManager();
-        KyotoCabinetBasedPersistedQueue queueManager
-                = new KyotoCabinetBasedPersistedQueue(new File("kyotodb"),
-                    "default queue");
-
-        ImportedWeapons importedWeapons = new ImportedWeapons(queueManager);
 
         // create an Army to make machine guns
         final Army army = new Army(armyAudit, importedWeapons);
@@ -70,13 +93,13 @@ public class MachineGunTest {
         army.startNewMission("default mission", "default queue",
                 dirtyWorkFactory, capsule);
 
-        Thread[] threads = new Thread[100];
+        Thread[] threads = new Thread[10];
 
         // get a machine gun to strafe
         final MachineGun<Integer> machineGun
                 = army.getANewMachineGun("default mission");        
 
-        // creates 100 producers
+        // creates 10 producers
         for (int i = 0; i < threads.length; i++) {
             threads[i] = new Thread("Producer " + i + " of " + threads.length) {
                 public void run() {
@@ -84,9 +107,9 @@ public class MachineGunTest {
                     for (int j = 0; j < 10000; j++) {
                         try {
                             int n = sequential++;
-                            //System.out.println(Thread
-                            //        .currentThread().getName()
-                            //        + " will produce " + n);
+//                            System.out.println(Thread
+//                                    .currentThread().getName()
+//                                    + " will produce " + n);
 
                             processed.add(n);
 
@@ -108,12 +131,14 @@ public class MachineGunTest {
             thread.join();
         }
 
+        // wait the queue is empty
+        while (!queueManager.isEmpty("default queue")) {
+            //System.out.println("waiting empty...");
+            Thread.sleep(500);
+        }
+
         // make all consumers die
         army.stopTheMission("default mission");
-
-        while (!queueManager.isEmpty("default queue")) {
-            Thread.sleep(100);
-        }
 
         // everything was well processed?
         Assert.assertTrue(processed.size() == 0);

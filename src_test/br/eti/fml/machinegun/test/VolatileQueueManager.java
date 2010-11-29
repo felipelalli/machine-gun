@@ -89,4 +89,9 @@ public class VolatileQueueManager implements PersistedQueueManager {
             t.join();
         }
     }
+
+    @Override
+    public boolean isEmpty(String queueName) {
+        return queues.get(queueName).size() == 0;
+    }
 }

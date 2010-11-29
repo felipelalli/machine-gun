@@ -24,9 +24,13 @@ public class KyotoCabinetBasedPersistedQueue implements PersistedQueueManager {
     private ArrayList<Thread> threads = new ArrayList<Thread>();
     private long size = 0;
     private boolean closed = false;
+    private long tolerance;
+    private long count = 0;
 
-    public KyotoCabinetBasedPersistedQueue(File directory, String ... queues)
+    public KyotoCabinetBasedPersistedQueue(File directory, long tolerance, String ... queues)
             throws IOException {
+
+        this.tolerance = tolerance;
 
         directory.mkdirs();
 
@@ -51,6 +55,10 @@ public class KyotoCabinetBasedPersistedQueue implements PersistedQueueManager {
 
                 db.cas(head(queue), null, longToBytes(0L));
                 db.cas(tail(queue), null, longToBytes(-1L));
+
+                //System.out.println("(" + bytesToLong(db.get(head(queue))) + ";"
+                //        + bytesToLong(db.get(tail(queue))) + ")");
+
             } catch (UnsatisfiedLinkError e) {
                 throw new IOException("java.library.path=\""
                         + System.getProperty("java.library.path") + "\"", e);
@@ -125,6 +133,8 @@ public class KyotoCabinetBasedPersistedQueue implements PersistedQueueManager {
 
             db.end_transaction(true);
         }
+        
+        sync(db);
     }
 
     @Override
@@ -159,13 +169,18 @@ public class KyotoCabinetBasedPersistedQueue implements PersistedQueueManager {
 
                             if (!needProcess) {
                                Thread.sleep(100);
+                               sync(db);
                             } else {
                                 byte[] addr = stringToBytes(
                                         "addr." + headToBeProcessed);
 
                                 byte[] data = db.get(addr);
-                                consumer.consume(data);
-                                db.remove(addr);
+
+                                if (data != null) {
+                                    consumer.consume(data);
+                                    db.remove(addr);
+                                    sync(db);
+                                }
                             }
                         }
                     } catch (InterruptedException e) {
@@ -180,35 +195,45 @@ public class KyotoCabinetBasedPersistedQueue implements PersistedQueueManager {
         threads.add(t.get());
         t.get().start();
     }
-/*
-    public byte[] booleanToBytes(Boolean value) {
-        if (value == null) {
-            return null;
-        } else {
-            Primitives.BooleanType.Builder data
-                    = Primitives.BooleanType.newBuilder();
 
-            data.setValue(value);
-            Primitives.BooleanType bytes = data.build();
-            return bytes.toByteArray();
+    private void sync(DB db) {
+        count++;
+
+        if (count >= tolerance) {
+            db.synchronize(true, null);
+            count = 0;
         }
     }
 
-    public Boolean bytesToBoolean(byte[] bytes) {
-        if (bytes == null) {
-            return null;
-        } else {
-            try {
-                Primitives.BooleanType data
-                        = Primitives.BooleanType.parseFrom(bytes);
+    /*
+        public byte[] booleanToBytes(Boolean value) {
+            if (value == null) {
+                return null;
+            } else {
+                Primitives.BooleanType.Builder data
+                        = Primitives.BooleanType.newBuilder();
 
-                return data.getValue();
-            } catch (InvalidProtocolBufferException e) {
-                throw new RuntimeException(e);
+                data.setValue(value);
+                Primitives.BooleanType bytes = data.build();
+                return bytes.toByteArray();
             }
         }
-    }
-*/
+
+        public Boolean bytesToBoolean(byte[] bytes) {
+            if (bytes == null) {
+                return null;
+            } else {
+                try {
+                    Primitives.BooleanType data
+                            = Primitives.BooleanType.parseFrom(bytes);
+
+                    return data.getValue();
+                } catch (InvalidProtocolBufferException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+    */
     public synchronized void close() throws InterruptedException {
         if (!closed) {
             closed = true;
@@ -236,8 +261,12 @@ public class KyotoCabinetBasedPersistedQueue implements PersistedQueueManager {
     }
 
     public boolean isEmpty(String queueName) {
-        return bytesToLong(this.db.get(queueName).get(head(queueName)))
-                > bytesToLong(this.db.get(queueName).get(tail(queueName)));
+        if (closed) {
+            throw new IllegalStateException("Kyoto already closed!");
+        } else {
+            return bytesToLong(this.db.get(queueName).get(head(queueName)))
+                    > bytesToLong(this.db.get(queueName).get(tail(queueName)));
+        }
     }
 
     @Override

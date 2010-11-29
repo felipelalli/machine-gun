@@ -93,4 +93,13 @@ public interface PersistedQueueManager {
      * @throws InterruptedException Because it may be asynchronous.
      */
     void killAllConsumers(String queueName) throws InterruptedException;
+
+    /**
+     * Sometimes is important to wait the queue is empty before finish
+     * the process.
+     *
+     * @param queueName The queue name
+     * @return <code>true</code> if the queue is empty
+     */
+    boolean isEmpty(String queueName);
 }
