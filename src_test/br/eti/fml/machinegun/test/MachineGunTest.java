@@ -20,15 +20,13 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MachineGunTest {
     private volatile int sequential = 0;
 
-    private static Set<Integer> processed
-            = Collections.synchronizedSet(new HashSet<Integer>());
+    private static ConcurrentHashMap<Integer, Boolean> processed
+            = new ConcurrentHashMap<Integer, Boolean>();
 
     public static void processed(int what) {
         processed.remove(what);
@@ -50,18 +48,20 @@ public class MachineGunTest {
 
     @Test
     public void kyoto() throws Exception {
-        long before = System.currentTimeMillis();
+        for (int i = 0; i < 30; i++) {
+            long before = System.currentTimeMillis();
 
-        KyotoCabinetBasedPersistedQueue queueManager
-                = new KyotoCabinetBasedPersistedQueue(
-                        new File("kyotodb"), 10240, "default queue");
+            KyotoCabinetBasedPersistedQueue queueManager
+                    = new KyotoCabinetBasedPersistedQueue(
+                            new File("kyotodb"), 10240, "default queue");
 
-        ImportedWeapons importedWeapons = new ImportedWeapons(queueManager);
-        test(importedWeapons);
+            ImportedWeapons importedWeapons = new ImportedWeapons(queueManager);
+            test(importedWeapons);
 
-        long diff = System.currentTimeMillis() - before;
-        System.out.println("kyoto test = " + diff + " ms; "
-                + ((float) diff / 10000f) + " ms each");
+            long diff = System.currentTimeMillis() - before;
+            System.out.println("kyoto test = " + diff + " ms; "
+                    + ((float) diff / 10000f) + " ms each");
+        }
     }
 
 
@@ -95,25 +95,25 @@ public class MachineGunTest {
         army.startNewMission("default mission", "default queue",
                 dirtyWorkFactory, capsule);
 
-        Thread[] threads = new Thread[10];
+        Thread[] threads = new Thread[100];
 
         // get a machine gun to strafe
         final MachineGun<Integer> machineGun
                 = army.getANewMachineGun("default mission");        
 
-        // creates 10 producers
+        // creates 100 producers
         for (int i = 0; i < threads.length; i++) {
             threads[i] = new Thread("Producer " + i + " of " + threads.length) {
                 public void run() {
-                    // Produces 10.000 elements
-                    for (int j = 0; j < 10000; j++) {
+                    // Produces 1.000 elements
+                    for (int j = 0; j < 1000; j++) {
                         try {
                             int n = sequential++;
 //                            System.out.println(Thread
 //                                    .currentThread().getName()
 //                                    + " will produce " + n);
 
-                            processed.add(n);
+                            processed.put(n, false);
 
                             // strafe
                             machineGun.fire(n);
@@ -143,6 +143,10 @@ public class MachineGunTest {
         army.stopTheMission("default mission");
 
         // everything was well processed?
+        if (processed.size() != 0) {
+            System.err.println("ERROR size != 0: " + processed.size());
+        }
+        
         Assert.assertTrue(processed.size() == 0);
     }
 }
