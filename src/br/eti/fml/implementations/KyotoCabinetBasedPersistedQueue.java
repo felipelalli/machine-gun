@@ -205,35 +205,6 @@ public class KyotoCabinetBasedPersistedQueue implements PersistedQueueManager {
         }
     }
 
-    /*
-        public byte[] booleanToBytes(Boolean value) {
-            if (value == null) {
-                return null;
-            } else {
-                Primitives.BooleanType.Builder data
-                        = Primitives.BooleanType.newBuilder();
-
-                data.setValue(value);
-                Primitives.BooleanType bytes = data.build();
-                return bytes.toByteArray();
-            }
-        }
-
-        public Boolean bytesToBoolean(byte[] bytes) {
-            if (bytes == null) {
-                return null;
-            } else {
-                try {
-                    Primitives.BooleanType data
-                            = Primitives.BooleanType.parseFrom(bytes);
-
-                    return data.getValue();
-                } catch (InvalidProtocolBufferException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-    */
     public synchronized void close() throws InterruptedException {
         if (!closed) {
             closed = true;

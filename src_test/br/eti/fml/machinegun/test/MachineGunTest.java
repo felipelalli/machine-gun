@@ -44,7 +44,8 @@ public class MachineGunTest {
         test(importedWeapons);
 
         long diff = System.currentTimeMillis() - before;
-        System.out.println("memory test = " + diff + " millis");
+        System.out.println("memory test = " + diff + " ms; "
+                + ((float) diff / 10000f) + " ms each");
     }
 
     @Test
@@ -59,7 +60,8 @@ public class MachineGunTest {
         test(importedWeapons);
 
         long diff = System.currentTimeMillis() - before;
-        System.out.println("kyoto test = " + diff + " millis");        
+        System.out.println("kyoto test = " + diff + " ms; "
+                + ((float) diff / 10000f) + " ms each");
     }
 
 
