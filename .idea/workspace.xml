@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" readonly="true" id="881e6eed-ebbf-4702-baee-6d054caed2f8" name="Default" comment="" />
-    <ignored path="$USER_HOME_GRIFFON$/" />
+    <list default="true" readonly="true" id="881e6eed-ebbf-4702-baee-6d054caed2f8" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/br/eti/fml/machinegun/Capsule.java" afterPath="$PROJECT_DIR$/src/br/eti/fml/machinegun/Capsule.java" />
+    </list>
     <ignored path="$USER_HOME_GRAILS$/" />
+    <ignored path="$USER_HOME_GRIFFON$/" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,10 +67,28 @@
   <component name="FileColors" enabled="true" enabledForTabs="true" />
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="MachineGunTest.java" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="MachineGunTest.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src_test/br/eti/fml/machinegun/test/MachineGunTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="92" column="0" selection-start="3367" selection-end="3367" vertical-scroll-proportion="0.034077555">
+            <state line="94" column="22" selection-start="3471" selection-end="3471" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Army.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/br/eti/fml/machinegun/Army.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="133" column="35" selection-start="6133" selection-end="6133" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Mission.java" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/br/eti/fml/machinegun/Mission.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="18" column="3" selection-start="531" selection-end="531" vertical-scroll-proportion="0.13357401">
               <folding />
             </state>
           </provider>
@@ -88,7 +108,6 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/src_test/br/fml/eti/machinegun/test/VolatileQueueManager.java" />
         <option value="$PROJECT_DIR$/src_test/br/fml/eti/machinegun/test/ProcessIntegerSlowly.java" />
         <option value="$PROJECT_DIR$/README" />
         <option value="$PROJECT_DIR$/src_test/br/fml/eti/machinegun/test/MachineGunTest.java" />
@@ -104,6 +123,7 @@
         <option value="$PROJECT_DIR$/src_test/br/eti/fml/machinegun/test/VolatileQueueManager.java" />
         <option value="$PROJECT_DIR$/src/br/eti/fml/implementations/KyotoCabinetBasedPersistedQueue.java" />
         <option value="$PROJECT_DIR$/src_test/br/eti/fml/machinegun/test/MachineGunTest.java" />
+        <option value="$PROJECT_DIR$/src/br/eti/fml/machinegun/Capsule.java" />
       </list>
     </option>
   </component>
@@ -148,6 +168,7 @@
       <sortByType />
     </navigator>
     <panes>
+      <pane id="Favorites" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -211,6 +232,10 @@
               <option name="myItemId" value="fml" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="machinegun" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
           </PATH>
           <PATH>
             <PATH_ELEMENT>
@@ -234,13 +259,30 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="machine-gun" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="machine-gun" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="fml" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
         </subPane>
       </pane>
       <pane id="Scope" />
       <pane id="PackagesPane">
         <subPane />
       </pane>
-      <pane id="Favorites" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -440,6 +482,15 @@
         <option name="Maven.BeforeRunTask" enabled="false" />
       </method>
     </configuration>
+    <configuration default="true" type="PhpUnitRemoteRunConfigurationType" factoryName="PHPUnit on Server">
+      <method>
+        <option name="AntTarget" enabled="false" />
+        <option name="BuildArtifacts" enabled="false" />
+        <option name="FtpUpload" enabled="false" />
+        <option name="Maven.BeforeRunTask" enabled="false" />
+        <option name="ValidateXdebugSetup" enabled="true" />
+      </method>
+    </configuration>
     <configuration default="true" type="JavascriptDebugSession" factoryName="Local">
       <JSDebuggerConfigurationSettings>
         <option name="engineId" value="embedded" />
@@ -449,15 +500,6 @@
         <option name="AntTarget" enabled="false" />
         <option name="BuildArtifacts" enabled="false" />
         <option name="Maven.BeforeRunTask" enabled="false" />
-      </method>
-    </configuration>
-    <configuration default="true" type="PhpUnitRemoteRunConfigurationType" factoryName="PHPUnit on Server">
-      <method>
-        <option name="AntTarget" enabled="false" />
-        <option name="BuildArtifacts" enabled="false" />
-        <option name="FtpUpload" enabled="false" />
-        <option name="Maven.BeforeRunTask" enabled="false" />
-        <option name="ValidateXdebugSetup" enabled="true" />
       </method>
     </configuration>
     <configuration default="true" type="JUnit" factoryName="JUnit">
@@ -549,14 +591,14 @@
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.13924731" sideWeight="0.71899885" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3993174" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="IDEtalk Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32992035" sideWeight="0.0" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="IDEtalk Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32992035" sideWeight="0.0" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="IDEtalk" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.12795699" sideWeight="0.66211605" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32992035" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32992035" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.7679181" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.15645161" sideWeight="0.53469855" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.15645161" sideWeight="0.66211605" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Dependency Viewer" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.45625693" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -610,16 +652,6 @@
     </buildFile>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/br/eti/fml/machinegun/auditorship/ArmyAudit.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="12" column="54" selection-start="260" selection-end="270" vertical-scroll-proportion="0.40893066" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/doc/javadoc/allclasses-frame.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="24" column="97" selection-start="704" selection-end="704" vertical-scroll-proportion="0.23163138" />
-      </provider>
-    </entry>
     <entry file="jar:///usr/lib/jvm/java-6-sun/src.zip!/java/io/File.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="487" column="76" selection-start="20187" selection-end="20204" vertical-scroll-proportion="0.17132217" />
@@ -665,11 +697,6 @@
         <state line="68" column="26" selection-start="2497" selection-end="2497" vertical-scroll-proportion="0.33333334" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/br/eti/fml/machinegun/Army.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="149" column="20" selection-start="6697" selection-end="6697" vertical-scroll-proportion="0.33333334" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src_test/br/eti/fml/machinegun/test/VolatileQueueManager.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="61" column="0" selection-start="1948" selection-end="1948" vertical-scroll-proportion="0.4474273" />
@@ -687,7 +714,28 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src_test/br/eti/fml/machinegun/test/MachineGunTest.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="92" column="0" selection-start="3367" selection-end="3367" vertical-scroll-proportion="0.034077555">
+        <state line="94" column="22" selection-start="3471" selection-end="3471" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/br/eti/fml/machinegun/Army.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="133" column="35" selection-start="6133" selection-end="6133" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/br/eti/fml/machinegun/Capsule.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="23" column="27" selection-start="585" selection-end="585" vertical-scroll-proportion="0.41877255">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/br/eti/fml/machinegun/Mission.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="18" column="3" selection-start="531" selection-end="531" vertical-scroll-proportion="0.13357401">
           <folding />
         </state>
       </provider>
