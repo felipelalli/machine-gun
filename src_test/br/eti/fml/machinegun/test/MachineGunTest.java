@@ -48,7 +48,7 @@ public class MachineGunTest {
 
     @Test
     public void kyoto() throws Exception {
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 300; i++) {
             long before = System.currentTimeMillis();
 
             KyotoCabinetBasedPersistedQueue queueManager

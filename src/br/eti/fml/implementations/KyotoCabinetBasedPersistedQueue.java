@@ -17,6 +17,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class KyotoCabinetBasedPersistedQueue implements PersistedQueueManager {
@@ -24,6 +25,7 @@ public class KyotoCabinetBasedPersistedQueue implements PersistedQueueManager {
     private ArrayList<Thread> threads = new ArrayList<Thread>();
     private long size = 0;
     private boolean closed = false;
+    private Semaphore semaphore = new Semaphore(1);
 
     public KyotoCabinetBasedPersistedQueue(File directory, String ... queues)
             throws IOException {
@@ -114,6 +116,7 @@ public class KyotoCabinetBasedPersistedQueue implements PersistedQueueManager {
                 throws InterruptedException {
 
         DB db = this.db.get(queueName);
+        semaphore.acquire();
 
         boolean ok = false;
 
@@ -124,12 +127,13 @@ public class KyotoCabinetBasedPersistedQueue implements PersistedQueueManager {
                     longToBytes(tail), longToBytes(newTail));
 
             if (!ok) {
-                //System.out.print(".");
-                Thread.sleep(10);
+                System.out.print(".");
             } else {
                 db.set(stringToBytes("addr." + newTail), data);
             }
         }
+
+        semaphore.release();
     }
 
     @Override
@@ -147,6 +151,7 @@ public class KyotoCabinetBasedPersistedQueue implements PersistedQueueManager {
             public void run() {
                 while (!closed) {
                     try {
+                        semaphore.acquire();
                         long headToBeProcessed = bytesToLong(
                                 db.get(head(queueName)));
 
@@ -159,9 +164,10 @@ public class KyotoCabinetBasedPersistedQueue implements PersistedQueueManager {
                                     longToBytes(headToBeProcessed + 1L));
                         }
 
+                        semaphore.release();
+
                         if (!needProcess) {
-                           //System.out.print(":");
-                           Thread.sleep(100);
+                           Thread.sleep(300);
                         } else {
                             byte[] addr = stringToBytes(
                                     "addr." + headToBeProcessed);
