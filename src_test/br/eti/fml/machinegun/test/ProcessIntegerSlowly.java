@@ -33,7 +33,7 @@ public class ProcessIntegerSlowly implements DirtyWork<Integer> {
 //            e.printStackTrace();
 //        }
 
-        MachineGunTest.processed(dataToBeProcessed);
+        MachineGunTest.decrease(dataToBeProcessed);
 
         //System.out.println("*** " + dataToBeProcessed + " was processed!!");
         audit.aConsumerHasBeenFinishedHisJob(jobId, consumerName, true, null, "OK!");

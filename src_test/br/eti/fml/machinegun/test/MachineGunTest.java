@@ -22,11 +22,15 @@ import org.junit.Test;
 import java.io.File;
 
 public class MachineGunTest {
-    private volatile int sequential = 0;
-    private static volatile int processed;
+    private int sequential = 0;
+    private static int processed;
 
-    public static void processed(int what) {
-        processed--;
+    public synchronized static void increase(int what) {
+        processed += what;
+    }
+
+    public synchronized static void decrease(int what) {
+        processed -= what;
     }
 
     @Test
@@ -34,7 +38,9 @@ public class MachineGunTest {
         long before = System.currentTimeMillis();
 
         // create a fake "persisted" queue manager. It just use BlockingQueue
-        PersistedQueueManager queueManager = new VolatileQueueManager();
+        PersistedQueueManager queueManager
+                = new VolatileQueueManager("default queue");
+        
         ImportedWeapons importedWeapons = new ImportedWeapons(queueManager);
         test(importedWeapons);
 
@@ -107,12 +113,12 @@ public class MachineGunTest {
                     // Produces 10.000 elements
                     for (int j = 0; j < 10000; j++) {
                         try {
-                            int n = sequential++;
+                            final int n = sequential++;
 //                            System.out.println(Thread
 //                                    .currentThread().getName()
 //                                    + " will produce " + n);
 
-                            processed++;
+                            increase(n);
 
                             // strafe
                             machineGun.fire(n);

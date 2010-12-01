@@ -12,7 +12,6 @@ import br.eti.fml.machinegun.externaltools.PersistedQueueManager;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -23,29 +22,26 @@ import java.util.concurrent.TimeUnit;
  */
 public class VolatileQueueManager implements PersistedQueueManager {
     private Map<String, BlockingQueue<byte[]>> queues
-            = new HashMap<String,  BlockingQueue<byte[]>>();
+            = new HashMap<String, BlockingQueue<byte[]>>();
 
-    private Random random = new Random();
+    int size = 0;
+
     private ArrayList<Thread> threads = new ArrayList<Thread>();
     private boolean end = false;
+
+    public VolatileQueueManager(String ... queues) {
+        for (String q : queues) {
+            this.queues.put(q, new LinkedBlockingQueue<byte[]>());
+        }
+    }
 
     @Override
     public void putIntoAnEmbeddedQueue(ArmyAudit armyAudit,
                                     String queueName, byte[] data)
             throws InterruptedException {
 
-        getQueue(queueName).put(data);
+        queues.get(queueName).put(data);
     }
-
-    private BlockingQueue<byte[]> getQueue(String queueName) {
-        if (!queues.containsKey(queueName)) {
-            queues.put(queueName, new LinkedBlockingQueue<byte[]>());
-        }
-
-        return queues.get(queueName);
-    }
-
-    int size = 0;
 
     @Override
     public void registerANewConsumerInAnEmbeddedQueue(final ArmyAudit armyAudit,
@@ -53,12 +49,13 @@ public class VolatileQueueManager implements PersistedQueueManager {
                                                  final Consumer consumer) {
 
         size++;
+        final BlockingQueue<byte[]> queue = queues.get(queueName);
 
         Thread t = new Thread("consumer " + size + " of " + size) {
             public void run() {
-                while (!end || getQueue(queueName).size() > 0) {
+                while (!end || queue.size() > 0) {
                     try {
-                        byte[] data = getQueue(queueName).poll(5, TimeUnit.SECONDS);
+                        byte[] data = queue.poll(1, TimeUnit.SECONDS);
 
                         if (data != null) {
                             consumer.consume(data);
