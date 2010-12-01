@@ -24,13 +24,9 @@ public class KyotoCabinetBasedPersistedQueue implements PersistedQueueManager {
     private ArrayList<Thread> threads = new ArrayList<Thread>();
     private long size = 0;
     private boolean closed = false;
-    private long tolerance;
-    private long count = 0;
 
-    public KyotoCabinetBasedPersistedQueue(File directory, long tolerance, String ... queues)
+    public KyotoCabinetBasedPersistedQueue(File directory, String ... queues)
             throws IOException {
-
-        this.tolerance = tolerance;
 
         directory.mkdirs();
 
@@ -45,7 +41,7 @@ public class KyotoCabinetBasedPersistedQueue implements PersistedQueueManager {
 
                 if (!db.open(directory.getAbsolutePath()
                         + File.separatorChar + "queue-"
-                        + Integer.toHexString(queue.hashCode()) + ".kch",
+                        + Integer.toHexString(queue.hashCode()) + ".kch#tune_defrag=10000",
                             DB.OWRITER | DB.OCREATE)) {
 
                     throw db.error();
@@ -55,6 +51,8 @@ public class KyotoCabinetBasedPersistedQueue implements PersistedQueueManager {
 
                 db.cas(head(queue), null, longToBytes(0L));
                 db.cas(tail(queue), null, longToBytes(-1L));
+
+                System.out.println("status: " + db.status());
 
                 //System.out.println("(" + bytesToLong(db.get(head(queue))) + ";"
                 //        + bytesToLong(db.get(tail(queue))) + ")");
@@ -117,24 +115,21 @@ public class KyotoCabinetBasedPersistedQueue implements PersistedQueueManager {
 
         DB db = this.db.get(queueName);
 
-        if (db.begin_transaction(false)) {
-            boolean ok = false;
+        boolean ok = false;
 
-            while (!ok) {
-                long tail = bytesToLong(db.get(tail(queueName)));
-                long newTail = tail + 1L;
-                ok = db.cas(tail(queueName),
-                        longToBytes(tail), longToBytes(newTail));
+        while (!ok) {
+            long tail = bytesToLong(db.get(tail(queueName)));
+            long newTail = tail + 1L;
+            ok = db.cas(tail(queueName),
+                    longToBytes(tail), longToBytes(newTail));
 
-                if (ok) {
-                    db.set(stringToBytes("addr." + newTail), data);
-                }
+            if (!ok) {
+                //System.out.print(".");
+                Thread.sleep(10);
+            } else {
+                db.set(stringToBytes("addr." + newTail), data);
             }
-
-            db.end_transaction(true);
         }
-        
-        sync(db);
     }
 
     @Override
@@ -152,35 +147,30 @@ public class KyotoCabinetBasedPersistedQueue implements PersistedQueueManager {
             public void run() {
                 while (!closed) {
                     try {
-                        if (db.begin_transaction(false)) {
-                            long headToBeProcessed = bytesToLong(
-                                    db.get(head(queueName)));
+                        long headToBeProcessed = bytesToLong(
+                                db.get(head(queueName)));
 
-                            long tail = bytesToLong(db.get(tail(queueName)));
-                            boolean needProcess = false;
+                        long tail = bytesToLong(db.get(tail(queueName)));
+                        boolean needProcess = false;
 
-                            if (tail >= headToBeProcessed) {
-                                needProcess = db.cas(head(queueName),
-                                        longToBytes(headToBeProcessed),
-                                        longToBytes(headToBeProcessed + 1L));
-                            }
+                        if (tail >= headToBeProcessed) {
+                            needProcess = db.cas(head(queueName),
+                                    longToBytes(headToBeProcessed),
+                                    longToBytes(headToBeProcessed + 1L));
+                        }
 
-                            db.end_transaction(true);
+                        if (!needProcess) {
+                           //System.out.print(":");
+                           Thread.sleep(100);
+                        } else {
+                            byte[] addr = stringToBytes(
+                                    "addr." + headToBeProcessed);
 
-                            if (!needProcess) {
-                               Thread.sleep(100);
-                               sync(db);
-                            } else {
-                                byte[] addr = stringToBytes(
-                                        "addr." + headToBeProcessed);
+                            byte[] data = db.get(addr);
 
-                                byte[] data = db.get(addr);
-
-                                if (data != null) {
-                                    consumer.consume(data);
-                                    db.remove(addr);
-                                    sync(db);
-                                }
+                            if (data != null) {
+                                consumer.consume(data);
+                                db.remove(addr);
                             }
                         }
                     } catch (InterruptedException e) {
@@ -196,15 +186,6 @@ public class KyotoCabinetBasedPersistedQueue implements PersistedQueueManager {
         t.get().start();
     }
 
-    private void sync(DB db) {
-        count++;
-
-        if (count >= tolerance) {
-            db.synchronize(true, null);
-            count = 0;
-        }
-    }
-
     public synchronized void close() throws InterruptedException {
         if (!closed) {
             closed = true;
@@ -214,8 +195,6 @@ public class KyotoCabinetBasedPersistedQueue implements PersistedQueueManager {
             }
 
             for (DB db : this.db.values()) {
-                db.synchronize(true, null);
-
                 if (!db.close()) {
                     db.error().printStackTrace();
                 }
@@ -235,8 +214,8 @@ public class KyotoCabinetBasedPersistedQueue implements PersistedQueueManager {
         if (closed) {
             throw new IllegalStateException("Kyoto already closed!");
         } else {
-            return bytesToLong(this.db.get(queueName).get(head(queueName)))
-                    > bytesToLong(this.db.get(queueName).get(tail(queueName)));
+            return bytesToLong(this.db.get(queueName).get(tail(queueName)))
+                    < bytesToLong(this.db.get(queueName).get(head(queueName)));
         }
     }
 

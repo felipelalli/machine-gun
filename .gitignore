@@ -2,7 +2,7 @@
 *~
 
 # Project files
-# empty
+.idea/workspace.xml
 
 # Compile generated files
 out/

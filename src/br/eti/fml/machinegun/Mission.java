@@ -128,6 +128,10 @@ public class Mission<BulletType> {
             }
         }
 
+        if (volatileBufferSize == 1) {
+            numberOfBufferConsumers = 0;
+        }
+
         if (numberOfPersistedQueueConsumers < 1) {
             numberOfPersistedQueueConsumers
                     = Runtime.getRuntime().availableProcessors() * 5;
@@ -144,7 +148,7 @@ public class Mission<BulletType> {
 
         this.volatileBufferSize = volatileBufferSize;
         this.buffer = new LinkedBlockingQueue<byte[]>(volatileBufferSize);
-        this.bufferConsumers = new Thread[ numberOfBufferConsumers];
+        this.bufferConsumers = new Thread[numberOfBufferConsumers];
         this.numberOfPersistedQueueConsumers = numberOfPersistedQueueConsumers;
     }
 

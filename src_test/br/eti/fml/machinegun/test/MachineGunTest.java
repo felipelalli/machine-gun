@@ -53,7 +53,7 @@ public class MachineGunTest {
 
             KyotoCabinetBasedPersistedQueue queueManager
                     = new KyotoCabinetBasedPersistedQueue(
-                            new File("kyotodb"), 10240, "default queue");
+                            new File("kyotodb"), "default queue");
 
             ImportedWeapons importedWeapons = new ImportedWeapons(queueManager);
             test(importedWeapons);
