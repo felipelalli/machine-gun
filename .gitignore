@@ -2,11 +2,7 @@
 *~
 
 # Project files
-.idea/
-*.iml
-*.eml
-.classpath
-.project
+# empty
 
 # Compile generated files
 out/
