@@ -20,16 +20,13 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class MachineGunTest {
     private volatile int sequential = 0;
-
-    private static ConcurrentHashMap<Integer, Boolean> processed
-            = new ConcurrentHashMap<Integer, Boolean>();
+    private static volatile int processed;
 
     public static void processed(int what) {
-        processed.remove(what);
+        processed--;
     }
 
     @Test
@@ -66,6 +63,8 @@ public class MachineGunTest {
 
 
     public void test(ImportedWeapons importedWeapons) throws Exception {
+        processed = 0;
+
         PersistedQueueManager queueManager = importedWeapons.getQueueManager();
 
         // create an ArmyAudit that just show to standard output
@@ -95,25 +94,25 @@ public class MachineGunTest {
         army.startNewMission("default mission", "default queue",
                 dirtyWorkFactory, capsule);
 
-        Thread[] threads = new Thread[100];
+        Thread[] threads = new Thread[10];
 
         // get a machine gun to strafe
         final MachineGun<Integer> machineGun
                 = army.getANewMachineGun("default mission");        
 
-        // creates 100 producers
+        // creates 10000 producers
         for (int i = 0; i < threads.length; i++) {
             threads[i] = new Thread("Producer " + i + " of " + threads.length) {
                 public void run() {
-                    // Produces 1.000 elements
-                    for (int j = 0; j < 1000; j++) {
+                    // Produces 10.000 elements
+                    for (int j = 0; j < 10000; j++) {
                         try {
                             int n = sequential++;
 //                            System.out.println(Thread
 //                                    .currentThread().getName()
 //                                    + " will produce " + n);
 
-                            processed.put(n, false);
+                            processed++;
 
                             // strafe
                             machineGun.fire(n);
@@ -143,10 +142,10 @@ public class MachineGunTest {
         army.stopTheMission("default mission");
 
         // everything was well processed?
-        if (processed.size() != 0) {
-            System.err.println("ERROR size != 0: " + processed.size());
+        if (processed != 0) {
+            System.err.println("ERROR size != 0: " + processed);
         }
         
-        Assert.assertTrue(processed.size() == 0);
+        Assert.assertTrue(processed == 0);
     }
 }

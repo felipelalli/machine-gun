@@ -12,8 +12,8 @@ import br.eti.fml.machinegun.externaltools.ImportedWeapons;
 import br.eti.fml.machinegun.externaltools.PersistedQueueManager;
 
 import java.util.Random;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -121,7 +121,7 @@ public class Mission<BulletType> {
 
         if (numberOfBufferConsumers < 1) {
             numberOfBufferConsumers
-                    = Runtime.getRuntime().availableProcessors();
+                    = Runtime.getRuntime().availableProcessors() * 2;
 
             if (numberOfBufferConsumers < 1) {
                  numberOfBufferConsumers = 1;
@@ -134,7 +134,7 @@ public class Mission<BulletType> {
 
         if (numberOfPersistedQueueConsumers < 1) {
             numberOfPersistedQueueConsumers
-                    = Runtime.getRuntime().availableProcessors() * 5;
+                    = Runtime.getRuntime().availableProcessors() * 4;
 
             if (numberOfPersistedQueueConsumers < 1) {
                 numberOfPersistedQueueConsumers = 1;
@@ -147,7 +147,7 @@ public class Mission<BulletType> {
         this.persistedQueueManager = importedWeapons.getQueueManager();
 
         this.volatileBufferSize = volatileBufferSize;
-        this.buffer = new LinkedBlockingQueue<byte[]>(volatileBufferSize);
+        this.buffer = new ArrayBlockingQueue<byte[]>(volatileBufferSize);
         this.bufferConsumers = new Thread[numberOfBufferConsumers];
         this.numberOfPersistedQueueConsumers = numberOfPersistedQueueConsumers;
     }
