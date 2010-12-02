@@ -2,7 +2,8 @@
 *~
 
 # Project files
-.idea/workspace.xml
+.idea/
+*.iml
 
 # Compile generated files
 out/
