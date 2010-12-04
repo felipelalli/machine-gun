@@ -25,6 +25,9 @@ public class MachineGunTest {
     private int sequential = 0;
     private static int processed;
 
+    private static final int THREADS = 4;
+    private static final int TESTS = 1000000;
+
     public synchronized static void increase(int what) {
         processed += what;
     }
@@ -45,13 +48,13 @@ public class MachineGunTest {
         test(importedWeapons);
 
         long diff = System.currentTimeMillis() - before;
-        System.out.println("memory test = " + diff + " ms; "
-                + ((float) diff / 10000f) + " ms each");
+        System.out.println("\nmemory test = " + diff + " ms; "
+                + ((double) diff / ((double) (THREADS * TESTS))) + " ms each");
     }
 
     @Test
     public void kyoto() throws Exception {
-        for (int i = 0; i < 300; i++) {
+        //for (int i = 0; i < 300; i++) {
             long before = System.currentTimeMillis();
 
             KyotoCabinetBasedPersistedQueue queueManager
@@ -62,9 +65,10 @@ public class MachineGunTest {
             test(importedWeapons);
 
             long diff = System.currentTimeMillis() - before;
-            System.out.println("kyoto test = " + diff + " ms; "
-                    + ((float) diff / 10000f) + " ms each");
-        }
+        
+            System.out.println("\nkyoto test = " + diff + " ms; "
+                    + ((double) diff / ((double) (THREADS * TESTS))) + " ms each");
+        //}
     }
 
 
@@ -98,20 +102,24 @@ public class MachineGunTest {
 
         // start the mission called "default mission" working on "default queue"
         army.startNewMission("default mission", "default queue",
-                dirtyWorkFactory, capsule);
+                dirtyWorkFactory, capsule, 100000, 4, 12);
 
-        Thread[] threads = new Thread[10];
+        Thread[] threads = new Thread[THREADS];
 
         // get a machine gun to strafe
         final MachineGun<Integer> machineGun
                 = army.getANewMachineGun("default mission");        
 
-        // creates 10000 producers
         for (int i = 0; i < threads.length; i++) {
+            final int y = i;
+
             threads[i] = new Thread("Producer " + i + " of " + threads.length) {
                 public void run() {
-                    // Produces 10.000 elements
-                    for (int j = 0; j < 10000; j++) {
+                    for (int j = 0; j < TESTS; j++) {
+                        if (j % 100000 == 0) {
+                            System.out.print("" + y);
+                        }
+
                         try {
                             final int n = sequential++;
 //                            System.out.println(Thread
@@ -140,8 +148,8 @@ public class MachineGunTest {
 
         // wait the queue is empty
         while (!queueManager.isEmpty("default queue")) {
-            //System.out.println("waiting empty...");
-            Thread.sleep(500);
+            System.out.print("?");
+            Thread.sleep(1000);
         }
 
         // make all consumers die
