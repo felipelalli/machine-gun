@@ -97,7 +97,7 @@ public class Mission<BulletType> {
      * {@link Runtime#availableProcessors()}<code> * 5</code>
      * for the persisted queue consumers.
      */
-    public static final int SMART_NUMBER_OF_CONSUMERS = 0;    
+    public static final int SMART_NUMBER_OF_CONSUMERS = -1;    
 
     /**
      * See the {@link Army#startNewMission} documentation.
@@ -119,7 +119,7 @@ public class Mission<BulletType> {
             throw new IllegalArgumentException("buffer size must be >= 1");
         }
 
-        if (numberOfBufferConsumers < 1) {
+        if (numberOfBufferConsumers < 0) {
             numberOfBufferConsumers
                     = Runtime.getRuntime().availableProcessors() * 2;
 
@@ -132,7 +132,7 @@ public class Mission<BulletType> {
             numberOfBufferConsumers = 0;
         }
 
-        if (numberOfPersistedQueueConsumers < 1) {
+        if (numberOfPersistedQueueConsumers < 0) {
             numberOfPersistedQueueConsumers
                     = Runtime.getRuntime().availableProcessors() * 4;
 
