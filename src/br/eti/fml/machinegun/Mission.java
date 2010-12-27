@@ -89,7 +89,7 @@ public class Mission<BulletType> {
      * big values if you have a lot of RAM memory and you don't care
      * so much if you lost something on system crashes.
      */
-    public static final int DEFAULT_VOLATILE_BUFFER_SIZE = 1024;
+    public static final int DEFAULT_VOLATILE_BUFFER_SIZE = 1;
 
     /**
      * It will use {@link Runtime#availableProcessors()}
