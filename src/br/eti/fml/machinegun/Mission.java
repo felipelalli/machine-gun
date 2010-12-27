@@ -85,7 +85,7 @@ public class Mission<BulletType> {
     private boolean end = false;
 
     /**
-     * The default is {@value}. Use 1 if you can't lost any data. Use
+     * The default is {@value}. Use 1 if you can't lose any data. Use
      * big values if you have a lot of RAM memory and you don't care
      * so much if you lost something on system crashes.
      */
@@ -106,7 +106,7 @@ public class Mission<BulletType> {
      * @param importedWeapons external implementations
      * @param target destination (queue name)
      * @param capsule a way to convert a bullet (data) into an array bytes and vice-versa
-     * @param volatileBufferSize use 1 if you want NEVER LOSS any data
+     * @param volatileBufferSize use 1 if you want to NEVER LOSE any data
      * @param numberOfBufferConsumers more if your PC has more memory and processors
      * @param numberOfPersistedQueueConsumers more if your PC has more memory and processors
      */
