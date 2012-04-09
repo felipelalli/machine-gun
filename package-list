@@ -1,5 +1,5 @@
-br.fml.eti.behavior
-br.fml.eti.machinegun
-br.fml.eti.machinegun.auditorship
-br.fml.eti.machinegun.externaltools
-br.fml.eti.machinegun.util
+br.eti.fml.behavior
+br.eti.fml.machinegun
+br.eti.fml.machinegun.auditorship
+br.eti.fml.machinegun.externaltools
+br.eti.fml.machinegun.tools
