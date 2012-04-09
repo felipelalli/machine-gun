@@ -3,12 +3,10 @@
  * CC-by Felipe Micaroni Lalli
  */
 
-package br.eti.fml.machinegun.util;
+package br.eti.fml.machinegun.tools;
 
 import br.eti.fml.machinegun.Capsule;
 import br.eti.fml.machinegun.WrongCapsuleException;
-import org.junit.Assert;
-import org.junit.Test;
 
 /**
  * Test your {@link br.eti.fml.machinegun.Capsule} implementation here.
@@ -25,10 +23,12 @@ public class CapsuleValidator<T> {
         this.valueToTest = valueToTest;
     }
 
-    @Test
     public void test() throws WrongCapsuleException {
         byte[] bytes = capsule.convertToBytes(valueToTest);
         T restored = capsule.restoreFromBytes(bytes);
-        Assert.assertEquals(valueToTest, restored);
+
+        if (restored == null || !restored.equals(valueToTest)) {
+            throw new WrongCapsuleException(restored + " != " + valueToTest);
+        }
     }
 }

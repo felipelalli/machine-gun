@@ -8,7 +8,6 @@ package br.eti.fml.machinegun;
 import br.eti.fml.behavior.BuildingException;
 import br.eti.fml.machinegun.auditorship.ArmyAudit;
 import br.eti.fml.machinegun.externaltools.Consumer;
-import br.eti.fml.machinegun.externaltools.ImportedWeapons;
 import br.eti.fml.machinegun.externaltools.PersistedQueueManager;
 
 import java.util.Random;
@@ -18,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
- * To start a new mission, see {@link br.eti.fml.machinegun.Army#startNewMission}.
+ * To start a new mission, see {@link br.eti.fml.machinegun.Army#startANewMission}.
  * </p>
  * <p>
  * A {@link Mission} knows his {@link Target} and keep
@@ -65,7 +64,7 @@ import java.util.concurrent.TimeUnit;
  * @author Felipe Micaroni Lalli (micaroni@gmail.com)
  *         Nov 15, 2010 2:18:28 PM
  */
-public class Mission<BulletType> {
+class Mission<BulletType> {
     // monitoring and external tools
     private ArmyAudit armyAudit;
     private PersistedQueueManager persistedQueueManager;
@@ -100,17 +99,17 @@ public class Mission<BulletType> {
     public static final int SMART_NUMBER_OF_CONSUMERS = -1;    
 
     /**
-     * See the {@link Army#startNewMission} documentation.
+     * See the {@link Army#startANewMission} documentation.
      * 
      * @param armyAudit to monitoring
-     * @param importedWeapons external implementations
+     * @param persistedQueueManager external queue implementation
      * @param target destination (queue name)
      * @param capsule a way to convert a bullet (data) into an array bytes and vice-versa
      * @param volatileBufferSize use 1 if you want to NEVER LOSE any data
      * @param numberOfBufferConsumers more if your PC has more memory and processors
      * @param numberOfPersistedQueueConsumers more if your PC has more memory and processors
      */
-    public Mission(ArmyAudit armyAudit, ImportedWeapons importedWeapons,
+    Mission(ArmyAudit armyAudit, PersistedQueueManager persistedQueueManager,
                    Target<BulletType> target, Capsule<BulletType> capsule,
                    int volatileBufferSize, int numberOfBufferConsumers,
                    int numberOfPersistedQueueConsumers) {
@@ -144,7 +143,7 @@ public class Mission<BulletType> {
         this.target = target;
         this.capsule = capsule;
         this.armyAudit = armyAudit;
-        this.persistedQueueManager = importedWeapons.getQueueManager();
+        this.persistedQueueManager = persistedQueueManager;
 
         this.volatileBufferSize = volatileBufferSize;
         this.buffer = new ArrayBlockingQueue<byte[]>(volatileBufferSize);
@@ -160,7 +159,7 @@ public class Mission<BulletType> {
      * @throws InterruptedException Because this function can block.
      * @param bullet The data to reach the target.
      */
-    public void fire(BulletType bullet) throws InterruptedException {
+    void fire(BulletType bullet) throws InterruptedException {
         try {
             byte[] data = this.capsule.convertToBytes(bullet);
 
@@ -180,7 +179,7 @@ public class Mission<BulletType> {
      * Starts the internal buffer consumers threads and registers the
      * persisted embedded queue consumers.
      */
-    public void startTheMission() {
+    void startTheMission() {
         if (this.volatileBufferSize > 1) { // if it is 1, the only buffer
                                            // consumer will work immediately
 
@@ -226,7 +225,7 @@ public class Mission<BulletType> {
         }
     }
 
-    private void consumerWork(String consumerName, byte[] crudeData) {
+    void consumerWork(String consumerName, byte[] crudeData) {
         try {
             BulletType data = capsule.restoreFromBytes(crudeData);
             long id = random.nextLong();
@@ -246,7 +245,7 @@ public class Mission<BulletType> {
         }
     }
 
-    private void internalBufferConsumerDoWork(byte[] data)
+    void internalBufferConsumerDoWork(byte[] data)
             throws InterruptedException {
 
         armyAudit.updateCurrentBufferSize(buffer.size(), volatileBufferSize);
@@ -257,7 +256,7 @@ public class Mission<BulletType> {
      * Kill all consumers (first of buffers and after persisted queue).
      * @throws InterruptedException Because it waits the threads die.
      */
-    public void stopTheMission() throws InterruptedException {
+    void stopTheMission() throws InterruptedException {
         if (!end) {
             end = true;
 
@@ -271,13 +270,13 @@ public class Mission<BulletType> {
         }
     }
 
-    private void putDataIntoAnEmbeddedQueue(String queueName, byte[] data)
+    void putDataIntoAnEmbeddedQueue(String queueName, byte[] data)
             throws InterruptedException {
         
         persistedQueueManager.putIntoAnEmbeddedQueue(armyAudit, queueName, data);
     }
 
-    private void registerAConsumerInEmbeddedQueue(
+    void registerAConsumerInEmbeddedQueue(
             String queueName, Consumer consumer) {
 
         persistedQueueManager.registerANewConsumerInAnEmbeddedQueue(

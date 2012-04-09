@@ -7,101 +7,88 @@ package br.eti.fml.machinegun.test;
 
 import br.eti.fml.behavior.BuildingException;
 import br.eti.fml.behavior.Factory;
-import br.eti.fml.implementations.KyotoCabinetBasedPersistedQueue;
 import br.eti.fml.machinegun.Army;
 import br.eti.fml.machinegun.Capsule;
 import br.eti.fml.machinegun.DirtyWork;
 import br.eti.fml.machinegun.MachineGun;
 import br.eti.fml.machinegun.auditorship.ArmyAudit;
-import br.eti.fml.machinegun.auditorship.NegligentAuditor;
-import br.eti.fml.machinegun.externaltools.ImportedWeapons;
 import br.eti.fml.machinegun.externaltools.PersistedQueueManager;
-import org.junit.Assert;
-import org.junit.Test;
+import br.eti.fml.machinegun.tools.GenericCapsuleForLazyPeople;
 
-import java.io.File;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MachineGunTest {
-    private int sequential = 0;
-    private static int processed;
+    private static AtomicInteger sequential = new AtomicInteger(0);
+    private static AtomicInteger processed = new AtomicInteger(0);
 
     private static final int THREADS = 4;
-    private static final int TESTS = 1000000;
+    private static final int TESTS = 10000;
 
-    public synchronized static void increase(int what) {
-        processed += what;
+    private static Random random = new Random();
+
+    public static void increase(int what) {
+        processed.addAndGet(what);
     }
 
-    public synchronized static void decrease(int what) {
-        processed -= what;
+    public static void decrease(int what) {
+        processed.addAndGet(-what);
     }
 
-    @Test
-    public void memory() throws Exception {
+    public static void main(String[] args) throws Exception {
         long before = System.currentTimeMillis();
 
         // create a fake "persisted" queue manager. It just use BlockingQueue
-        PersistedQueueManager queueManager
-                = new VolatileQueueManager("default queue");
-        
-        ImportedWeapons importedWeapons = new ImportedWeapons(queueManager);
-        test(importedWeapons);
+        PersistedQueueManager queueManager = new VolatileQueueManager("default queue");
+        test(queueManager);
 
         long diff = System.currentTimeMillis() - before;
         System.out.println("\nmemory test = " + diff + " ms; "
                 + ((double) diff / ((double) (THREADS * TESTS))) + " ms each");
     }
 
-    @Test
-    public void kyoto() throws Exception {
-        //for (int i = 0; i < 300; i++) {
-            long before = System.currentTimeMillis();
-
-            KyotoCabinetBasedPersistedQueue queueManager
-                    = new KyotoCabinetBasedPersistedQueue(
-                            new File("kyotodb"), "default queue");
-
-            ImportedWeapons importedWeapons = new ImportedWeapons(queueManager);
-            test(importedWeapons);
-
-            long diff = System.currentTimeMillis() - before;
-        
-            System.out.println("\nkyoto test = " + diff + " ms; "
-                    + ((double) diff / ((double) (THREADS * TESTS))) + " ms each");
-        //}
-    }
-
-
-    public void test(ImportedWeapons importedWeapons) throws Exception {
-        processed = 0;
-
-        PersistedQueueManager queueManager = importedWeapons.getQueueManager();
+    public static void test(PersistedQueueManager queueManager) throws Exception {
+        processed.set(0);
 
         // create an ArmyAudit that just show to standard output
-        //ArmyAudit armyAudit = new SystemOutAudit();
-        ArmyAudit armyAudit = new NegligentAuditor();
+        ArmyAudit armyAudit = new SystemOutAudit();
+        //ArmyAudit armyAudit = new NegligentAuditor();
 
         // create an Army to make machine guns
-        final Army army = new Army(armyAudit, importedWeapons);
+        final Army army = new Army(armyAudit, queueManager);
 
         // here is the dirty task producer
         // ProcessIntegerSlowly simulates a "dirty work" and just sleep randomly
         Factory<DirtyWork<Integer>> dirtyWorkFactory = new Factory<DirtyWork<Integer>>() {
-            private ProcessIntegerSlowly processIntegerSlowly
-                    = new ProcessIntegerSlowly();
-
             @Override
             public DirtyWork<Integer> buildANewInstance() throws BuildingException {
-                return processIntegerSlowly;
+                return new DirtyWork<Integer>() {
+                    @Override
+                    public void workOnIt(long jobId, String consumerName, ArmyAudit audit, Integer dataToBeProcessed) {
+                        Integer time = random.nextInt(2);
+
+                        System.out.println("*** Will process " + dataToBeProcessed
+                                + " for " + time + " millis...");
+
+                        try {
+                            Thread.sleep(time);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
+                        decrease(dataToBeProcessed);
+
+                        audit.aConsumerHasBeenFinishedHisJob(jobId, consumerName, true, null, "OK!");
+                    }
+                };
             }
         };
 
-        // This capsule uses Google Protocol Buffers to convert Integer
-        // into an array of bytes and vice-versa
-        Capsule<Integer> capsule = new CapsuleInteger();
+        // This capsule uses the Java default serialization implementation
+        Capsule<Integer> capsule = new GenericCapsuleForLazyPeople<Integer>();
 
         // start the mission called "default mission" working on "default queue"
-        army.startNewMission("default mission", "default queue",
+        army.startANewMission("default mission", "default queue",
                 dirtyWorkFactory, capsule, 100000, 4, 12);
 
         Thread[] threads = new Thread[THREADS];
@@ -121,10 +108,10 @@ public class MachineGunTest {
                         }
 
                         try {
-                            final int n = sequential++;
-//                            System.out.println(Thread
-//                                    .currentThread().getName()
-//                                    + " will produce " + n);
+                            final int n = sequential.incrementAndGet();
+                            System.out.println(Thread
+                                    .currentThread().getName()
+                                    + " will produce " + n);
 
                             increase(n);
 
@@ -156,10 +143,10 @@ public class MachineGunTest {
         army.stopTheMission("default mission");
 
         // everything was well processed?
-        if (processed != 0) {
+        if (processed.get() != 0) {
             System.err.println("ERROR size != 0: " + processed);
         }
-        
-        Assert.assertTrue(processed == 0);
+
+        assert processed.get() == 0;
     }
 }

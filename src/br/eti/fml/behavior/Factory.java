@@ -47,6 +47,7 @@ public abstract class Factory<T> {
      * the implementation can just return a cache or a singleton.
      * 
      * @return a new instance.
+     * @throws BuildingException if something got wrong.
      */
     public abstract T buildANewInstance() throws BuildingException;
 
@@ -56,9 +57,10 @@ public abstract class Factory<T> {
      *
      * @param n number of needed instances.
      * @return an array with all instances required.
+     * @throws BuildingException if something got wrong with any iteration.
      */
     public T[] buildNewInstances(int n) throws BuildingException {
-        T[] instances = (T[]) new Object[n];
+        @SuppressWarnings("unchecked") T[] instances = (T[]) new Object[n];
 
         for (int i = 0; i < n; i++) {
             instances[i] = buildANewInstance();

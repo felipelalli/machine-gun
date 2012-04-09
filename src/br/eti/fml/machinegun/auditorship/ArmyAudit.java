@@ -63,8 +63,8 @@ public interface ArmyAudit {
                                    String resultDetails);
 
     /**
-     * If <code>newSize / maxSize</code> is near to 100%, it means
-     * that the internal buffer is overloaded and a call to
+     * If <code>newSize / maxSize</code> is near to 100%
+     * the internal buffer is overloaded and a call to
      * {@link br.eti.fml.machinegun.MachineGun#fire} can block
      * for a while.
      *

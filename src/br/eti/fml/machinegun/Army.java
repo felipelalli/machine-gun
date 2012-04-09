@@ -7,7 +7,7 @@ package br.eti.fml.machinegun;
 
 import br.eti.fml.behavior.Factory;
 import br.eti.fml.machinegun.auditorship.ArmyAudit;
-import br.eti.fml.machinegun.externaltools.ImportedWeapons;
+import br.eti.fml.machinegun.externaltools.PersistedQueueManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,7 +21,7 @@ import java.util.Map;
  * asynchronously.</p>
  * <p>Before {@link #getANewMachineGun to take a new machine gun},
  * don't forget to
- * {@link #startNewMission start a mission}.</p>
+ * {@link #startANewMission start a mission}.</p>
  * <pre>
    [ O ]
      \ \      p
@@ -42,10 +42,10 @@ public class Army extends Factory<MachineGun> {
     private Map<String, Mission> missions;
     private String lastUsedMission = "";
     private ArmyAudit armyAudit;
-    private ImportedWeapons importedWeapons;
+    private PersistedQueueManager persistedQueueManager;
 
     /**
-     * Create a new Army. See {@link #startNewMission} to have some fun.
+     * Create a new Army. See {@link #startANewMission} to have some fun.
      * 
      * @param armyAudit If you want to take control of your Army. See
      *                  {@link br.eti.fml.machinegun.auditorship.NegligentAuditor}
@@ -55,18 +55,28 @@ public class Army extends Factory<MachineGun> {
      *
      * @throws IllegalArgumentException if some parameters are <code>null</code>.
      *
-     * @param importedWeapons Specific implementations.
+     * @param persistedQueueManager Specific queue implementation.
      */
-    public Army(ArmyAudit armyAudit, ImportedWeapons importedWeapons) {
+    public Army(ArmyAudit armyAudit, PersistedQueueManager persistedQueueManager) {
         this.missions = new HashMap<String, Mission>();
 
-        if (armyAudit == null || importedWeapons == null) {
+        if (armyAudit == null || persistedQueueManager == null) {
             throw new IllegalArgumentException("Internal error: armyAudit and"
-                    + " importedWeapons can't be null!");
+                    + " persistedQueueManager can't be null!");
         }
 
         this.armyAudit = armyAudit;
-        this.importedWeapons = importedWeapons;
+        this.persistedQueueManager = persistedQueueManager;
+
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                try {
+                    stopAllMissions();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
     }
 
     /**
@@ -97,8 +107,8 @@ public class Army extends Factory<MachineGun> {
      * @param capsule A {@link Capsule} is a way to keep the
      *                "bullet" (data) intact through the way to
      *                the target. It have to be able to convert a data
-     *                to a byte array and vice-versa. If you are really lazy,
-     *                see {@link br.eti.fml.machinegun.util.GenericCapsuleForLazyPeople}.
+     *                to a byte array and vice-versa. If you are really lazy
+     *                use {@link br.eti.fml.machinegun.tools.GenericCapsuleForLazyPeople}.
      *
      * @param volatileBufferSize It is the <b>internal buffer size</b>.
      *                      If the buffer is full, the {@link MachineGun#fire}
@@ -125,13 +135,13 @@ public class Army extends Factory<MachineGun> {
      *                              on your {@link Runtime#availableProcessors()
      *                              available processors}.
      */
-    public <T> void startNewMission(String missionName, String queueName,
+    public <T> void startANewMission(String missionName, String queueName,
             Factory<DirtyWork<T>> dirtyWorkFactory,
             Capsule<T> capsule, int volatileBufferSize,
             int numberOfBufferConsumers, int numberOfPersistedQueueConsumers) {
 
         Target<T> target = new Target<T>(queueName, dirtyWorkFactory);
-        Mission<T> mission = new Mission<T>(armyAudit, importedWeapons,
+        Mission<T> mission = new Mission<T>(armyAudit, persistedQueueManager,
                 target, capsule, volatileBufferSize,
                 numberOfBufferConsumers, numberOfPersistedQueueConsumers);
 
@@ -141,17 +151,22 @@ public class Army extends Factory<MachineGun> {
     }
 
     /**
-     * Call {@link #startNewMission} using default values to
+     * Call {@link #startANewMission} using default values to
      * <code>volatileBufferSize</code>, <code>numberOfBufferConsumers</code>
      * and <code>numberOfPersistedQueueConsumers</code>.
      * 
-     * @see #startNewMission
+     * @param missionName see {@link #startANewMission(String, String, br.eti.fml.behavior.Factory, Capsule, int, int, int)}
+     * @param queueName see {@link #startANewMission(String, String, br.eti.fml.behavior.Factory, Capsule, int, int, int)}
+     * @param dirtyWorkFactory see {@link #startANewMission(String, String, br.eti.fml.behavior.Factory, Capsule, int, int, int)}
+     * @param capsule see {@link #startANewMission(String, String, br.eti.fml.behavior.Factory, Capsule, int, int, int)}
+     * @see {@link #startANewMission(String, String, br.eti.fml.behavior.Factory, Capsule, int, int, int)}
      */
-    public <T> void startNewMission(String missionName, String queueName,
+    @SuppressWarnings("UnusedDeclaration")
+    public <T> void startANewMission(String missionName, String queueName,
             Factory<DirtyWork<T>> dirtyWorkFactory,
             Capsule<T> capsule) {
 
-        startNewMission(missionName, queueName, dirtyWorkFactory,
+        startANewMission(missionName, queueName, dirtyWorkFactory,
                 capsule, Mission.DEFAULT_VOLATILE_BUFFER_SIZE,
                 Mission.SMART_NUMBER_OF_CONSUMERS,
                 Mission.SMART_NUMBER_OF_CONSUMERS);
@@ -159,20 +174,19 @@ public class Army extends Factory<MachineGun> {
 
     /**
      * Stop all missions.
+     * @throws InterruptedException If the Thread was interrupted while waiting for every consumer die.
      */
-    public void finalize() throws Throwable {
+    public void stopAllMissions() throws InterruptedException {
         for (String mission : this.missions.keySet()) {
             this.stopTheMission(mission);
         }
-
-        super.finalize();
     }
 
     /**
      * Stop a specific mission.
      *
      * @param missionName The mission name used when you have started a mission.
-     * @throws InterruptedException Because it will wait for every consumer die.
+     * @throws InterruptedException If the Thread was interrupted while waiting for every consumer die.
      * @throws UnregisteredMissionException If the mission was not started before.
      */
     public void stopTheMission(String missionName) throws
@@ -200,7 +214,7 @@ public class Army extends Factory<MachineGun> {
         if (!missions.containsKey(missionName)) {
             throw new UnregisteredMissionException("The mission '"
                     + missionName
-                    + "' was not registered yet! See 'startNewMission(...)'"
+                    + "' was not registered yet! See 'startANewMission(...)'"
                     + " function.");
         }
 
@@ -210,7 +224,7 @@ public class Army extends Factory<MachineGun> {
     /**
      * Produces a shiny and new machine gun.
      *
-     * @throws UnregisteredMissionException If you forget to {@link #startNewMission start a mission}
+     * @throws UnregisteredMissionException If you forget to {@link #startANewMission start a mission}
      *                                      before using this.
      *
      * @param missionName the associated mission

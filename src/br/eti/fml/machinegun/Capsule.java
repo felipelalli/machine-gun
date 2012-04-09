@@ -24,7 +24,7 @@ package br.eti.fml.machinegun;
                                                                
 </pre></small></small></small>
  *
- * @see br.eti.fml.machinegun.util.GenericCapsuleForLazyPeople
+ * @see br.eti.fml.machinegun.tools.GenericCapsuleForLazyPeople
  * @author Felipe Micaroni Lalli (micaroni@gmail.com)
  *         Nov 15, 2010 6:51:35 AM
  */

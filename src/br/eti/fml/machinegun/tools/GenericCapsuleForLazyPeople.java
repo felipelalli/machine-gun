@@ -3,7 +3,7 @@
  * CC-by Felipe Micaroni Lalli
  */
 
-package br.eti.fml.machinegun.util;
+package br.eti.fml.machinegun.tools;
 
 import br.eti.fml.machinegun.Capsule;
 import br.eti.fml.machinegun.WrongCapsuleException;
