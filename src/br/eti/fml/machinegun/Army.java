@@ -159,7 +159,7 @@ public class Army extends Factory<MachineGun> {
      * @param queueName see {@link #startANewMission(String, String, br.eti.fml.behavior.Factory, Capsule, int, int, int)}
      * @param dirtyWorkFactory see {@link #startANewMission(String, String, br.eti.fml.behavior.Factory, Capsule, int, int, int)}
      * @param capsule see {@link #startANewMission(String, String, br.eti.fml.behavior.Factory, Capsule, int, int, int)}
-     * @see {@link #startANewMission(String, String, br.eti.fml.behavior.Factory, Capsule, int, int, int)}
+     * @see #startANewMission(String, String, br.eti.fml.behavior.Factory, Capsule, int, int, int)
      */
     @SuppressWarnings("UnusedDeclaration")
     public <T> void startANewMission(String missionName, String queueName,
