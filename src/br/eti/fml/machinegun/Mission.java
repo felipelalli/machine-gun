@@ -64,7 +64,7 @@ import java.util.concurrent.TimeUnit;
  * @author Felipe Micaroni Lalli (micaroni@gmail.com)
  *         Nov 15, 2010 2:18:28 PM
  */
-class Mission<BulletType> {
+public class Mission<BulletType> {
     // monitoring and external tools
     private ArmyAudit armyAudit;
     private PersistedQueueManager persistedQueueManager;
